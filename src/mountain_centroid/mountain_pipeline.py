@@ -34,8 +34,8 @@ def main() -> None:
     parser.add_argument(
         "--bpp-backend",
         choices=("vienna", "linearpartition"),
-        default="vienna",
-        help="BPP backend: exact ViennaRNA (default) or LinearPartition-V",
+        default="linearpartition",
+        help="BPP backend: LinearPartition-V (default) or exact ViennaRNA",
     )
     parser.add_argument(
         "--bpp-beam-size",

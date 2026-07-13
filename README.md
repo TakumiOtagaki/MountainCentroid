@@ -16,7 +16,7 @@ The initial implementation was extracted from
 ## Current scope
 
 - Compute base-pair probabilities and the expected cut-based mountain height
-  with exact ViennaRNA or approximate LinearPartition-V.
+  with default LinearPartition-V or optional exact ViennaRNA.
 - Search valid structures with a left-to-right beam-pruned solver.
 - Enforce Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs,
   minimum hairpin length 3, and no pseudoknots during inference.
@@ -29,10 +29,10 @@ avoiding tuple copies proportional to nesting depth. Beam pruning is an
 approximation to the mathematical Fréchet mean; larger beams retain more prefix
 states. The default is B=100.
 
-The public software intentionally has one prediction route. ViennaRNA and
-LinearPartition-V are interchangeable BPP backends for that route, rather than
-different inference modes. Pseudoknot prediction and alternative MIQP/MILP
-objectives are out of scope.
+The public software intentionally has one prediction route. LinearPartition-V
+is the default fast BPP backend; ViennaRNA is an optional exact backend for the
+same route. Pseudoknot prediction and alternative MIQP/MILP objectives are out
+of scope.
 
 ## Installation
 
@@ -40,7 +40,7 @@ objectives are out of scope.
 python -m pip install -e .
 ```
 
-To enable the optional LinearPartition backend, clone recursively and build the
+To use the default LinearPartition backend, clone recursively and build the
 vendored upstream source:
 
 ```sh
@@ -60,14 +60,18 @@ The solver beam can be changed without selecting a different method:
 mountain-centroid --seq ACGUACGUACGU --beam-size 200
 ```
 
-ViennaRNA remains the default and reference backend. For long sequences,
-LinearPartition-V can be selected with:
+LinearPartition-V is the default:
 
 ```sh
 mountain-centroid \
   --seq ACGUACGUACGU \
-  --bpp-backend linearpartition \
   --bpp-beam-size 100
+```
+
+The optional exact ViennaRNA backend can be selected with:
+
+```sh
+mountain-centroid --seq ACGUACGUACGU --bpp-backend vienna
 ```
 
 LinearPartition uses beam search and therefore approximates the partition
@@ -94,7 +98,7 @@ exhaustive optimization with:
 uv run python benchmarks/benchmark_optimality.py
 ```
 
-The reference end-to-end runtime benchmark separates ViennaRNA BPP calculation,
+An optional exact-backend timing benchmark separates ViennaRNA BPP calculation,
 expected-profile construction, and Mountain Centroid inference:
 
 ```sh
@@ -108,5 +112,5 @@ uv run python benchmarks/benchmark_vienna_pipeline.py \
 src/mountain_centroid/   reusable implementation and CLI
 tests/                   constraints, exact-oracle, backend, and formatting tests
 benchmarks/              reproducible solver scaling benchmark
-vendor/LinearPartition/  pinned optional BPP backend (Git submodule)
+vendor/LinearPartition/  pinned default BPP backend (Git submodule)
 ```

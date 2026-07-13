@@ -28,6 +28,56 @@ def _bases_available_after_minimum_loop(sequence: str) -> list[int]:
     return suffix_mask
 
 
+def _prune_with_depth_diversity(
+    candidates: list[tuple[float, int, int, int]],
+    stack_depth: list[int],
+    beam_size: int,
+) -> list[tuple[float, int, int, int]]:
+    """Fill the beam round-robin across reachable mountain depths.
+
+    A purely global prefix-cost beam can discard every deeply nested state long
+    before distant pairs become closable. Round-robin pruning across the ten
+    best-scoring depth classes preserves the O(B) state budget while retaining
+    several alternative stacks at relevant future height ranges.
+    """
+    ranked = sorted(candidates, key=lambda item: item[:2])
+    candidates_at_depth: dict[int, list[tuple[float, int, int, int]]] = {}
+    for candidate in ranked:
+        depth = stack_depth[candidate[2]]
+        candidates_at_depth.setdefault(depth, []).append(candidate)
+
+    depth_order = sorted(
+        candidates_at_depth,
+        key=lambda depth: candidates_at_depth[depth][0][:2],
+    )
+    if 0 in depth_order:
+        depth_order.remove(0)
+        depth_order.insert(0, 0)
+    number_of_depths = min(10, beam_size)
+    if depth_order and depth_order[0] == 0:
+        depth_order = depth_order[:1] + depth_order[1:number_of_depths]
+    else:
+        depth_order = depth_order[:number_of_depths]
+
+    selected: list[tuple[float, int, int, int]] = []
+    rank_within_depth = 0
+    while len(selected) < beam_size:
+        added = False
+        for depth in depth_order:
+            group = candidates_at_depth[depth]
+            if rank_within_depth >= len(group):
+                continue
+            selected.append(group[rank_within_depth])
+            added = True
+            if len(selected) == beam_size:
+                break
+        if not added:
+            break
+        rank_within_depth += 1
+    selected.sort(key=lambda item: item[:2])
+    return selected
+
+
 def beam_mountain_centroid(
     sequence: str,
     expected_heights: Sequence[float],
@@ -44,8 +94,8 @@ def beam_mountain_centroid(
     sequence length.
 
     Beam pruning makes the returned structure an approximation to the
-    sequence-constrained Fréchet mean. Setting a sufficiently large beam retains
-    every prefix state and recovers the exact optimum for small instances.
+    sequence-constrained Fréchet mean. The implementation is checked against an
+    exhaustive oracle on small instances and long-range regression profiles.
     """
     sequence = normalise_sequence(sequence)
     n = len(sequence)
@@ -144,18 +194,11 @@ def beam_mountain_centroid(
                         cost,
                     )
 
-        candidates = sorted(best_by_stack.values(), key=lambda item: item[:2])
-        beam = candidates[:beam_size]
-
-        # Keep the all-unpaired prefix as a guaranteed feasible fallback. This
-        # reserves at most one beam entry and prevents dead ends near sequence end.
-        empty_state = best_by_stack.get(0)
-        if empty_state is not None and all(state[2] != 0 for state in beam):
-            if beam_size == 1:
-                beam = [empty_state]
-            else:
-                beam[-1] = empty_state
-                beam.sort(key=lambda item: item[:2])
+        beam = _prune_with_depth_diversity(
+            list(best_by_stack.values()),
+            stack_depth,
+            beam_size,
+        )
 
     final_state = min(
         (state for state in beam if state[2] == 0),

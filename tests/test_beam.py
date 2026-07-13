@@ -2,6 +2,7 @@ import random
 
 import pytest
 
+import mountain_centroid.api as api
 from mountain_centroid import predict_from_profile
 from mountain_centroid.beam import beam_mountain_centroid
 from mountain_centroid.formatting import pairs_from_bracket
@@ -106,6 +107,20 @@ def test_public_profile_api_normalises_sequence_and_reports_direct_error():
     assert prediction.squared_mountain_error == direct_error
 
 
+def test_public_prediction_defaults_to_linearpartition(monkeypatch):
+    captured = {}
+
+    def fake_compute_bpp_and_mu(sequence, **kwargs):
+        captured.update(kwargs)
+        return None, [0.0] * (len(sequence) - 1)
+
+    monkeypatch.setattr(api, "compute_bpp_and_mu", fake_compute_bpp_and_mu)
+    prediction = api.predict("GAAAU")
+
+    assert captured["backend"] == "linearpartition"
+    assert prediction.bpp_backend == "linearpartition"
+
+
 def test_random_outputs_always_satisfy_structural_invariants():
     rng = random.Random(11)
     for _ in range(50):
@@ -129,6 +144,32 @@ def test_random_outputs_always_satisfy_structural_invariants():
             abs(right - left) <= 1
             for left, right in zip(result.heights, result.heights[1:])
         )
+
+
+def test_beam_100_preserves_long_range_nested_5s_profile():
+    sequence = (
+        "GGCCUGGUGGUUCUAGCGAGGAGCAUGAACCCGAUCCCAUCCCGAACUCGGCCGUUAAACU"
+        "CCUCAGCGCCAAUGGUACUAUGGCUCAAGCCCUGGGAGAGUAGGUCGCUGCCAGGCCU"
+    )
+    target_structure = (
+        "((((((((((.....((((((((.....((((((.............))))..))....)))))).))"
+        ".((.((....(((.(((....))).)))....)).))...))))))))))."
+    )
+    target_heights = []
+    depth = 0
+    for character in target_structure[:-1]:
+        depth += character == "("
+        depth -= character == ")"
+        target_heights.append(depth)
+
+    result = beam_mountain_centroid(
+        sequence,
+        target_heights,
+        beam_size=100,
+    )
+
+    assert result.structure == target_structure
+    assert result.squared_error == 0.0
 
 
 @pytest.mark.parametrize("beam_size", [0, -1, True, 1.5])

@@ -53,7 +53,7 @@ def predict(
     sequence: str,
     *,
     temperature: float = 37.0,
-    bpp_backend: Backend = "vienna",
+    bpp_backend: Backend = "linearpartition",
     beam_size: int = 100,
     bpp_beam_size: int = 100,
     bpp_cutoff: float = 0.0,

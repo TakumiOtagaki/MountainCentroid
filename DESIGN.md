@@ -13,8 +13,9 @@ The prediction constraints are fixed parts of the method:
 - minimum hairpin length 3;
 - no pseudoknots.
 
-ViennaRNA (reference) and LinearPartition-V (fast approximation) are BPP
-backends for the same estimator. They are not separate inference modes.
+LinearPartition-V (fast approximation, public default) and ViennaRNA (optional
+exact backend) are BPP backends for the same estimator. They are not separate
+inference modes.
 
 The former height-only MIQP and pseudoknot-aware L1-MILP branches were research
 prototypes. They are intentionally absent from the public CLI. Their last
@@ -27,7 +28,8 @@ The stable interface should remain close to:
 ```text
 mountain-centroid --seq SEQUENCE
 mountain-centroid --seq SEQUENCE --beam-size 100
-mountain-centroid --seq SEQUENCE --bpp-backend linearpartition --bpp-beam-size 100
+mountain-centroid --seq SEQUENCE --bpp-beam-size 100
+mountain-centroid --seq SEQUENCE --bpp-backend vienna
 ```
 
 Algorithm-development switches, reference solvers, and paper-only sampling
@@ -44,19 +46,16 @@ current Python implementation gives O(n B log B). It is therefore linear in
 sequence length for fixed B. The result is approximate whenever pruning drops a
 prefix needed by the global optimum.
 
-An exhaustive small-instance oracle lives only in the test suite. It verifies
-that the beam implementation recovers the exact constrained optimum when the
-beam is large enough; it is not a user-facing inference mode.
+An exhaustive small-instance oracle lives only in the test suite. Along with a
+long-range 5S rRNA regression profile, it checks the pruning implementation; it
+is not a user-facing inference mode.
 
 ## Remaining work
 
 Work remaining, in priority order:
 
-1. Run and report the reference ViennaRNA pipeline runtime benchmark, separating
-   BPP, profile-construction, and solver time. The solver beam is fixed at 100.
-2. Validate beam-100 agreement on ViennaRNA-derived short profiles. Keep
-   LinearPartition as an optional fast backend rather than expanding the main
-   runtime comparison.
-3. Implement the Boltzmann-sampling rooted-L2 evaluation in the paper analysis
+1. Complete the RNAstralign comparison against ViennaRNA MFE and the standard
+   ViennaRNA centroid, including family-stratified outlier inspection.
+2. Implement the Boltzmann-sampling rooted-L2 evaluation in the paper analysis
    code, not as an inference mode.
-4. Freeze datasets, versions, seeds, and commands for the TBIO submission.
+3. Freeze datasets, versions, seeds, and commands for the TBIO submission.

@@ -156,7 +156,7 @@ def compute_bpp_and_mu(
     seq: str,
     temperature: float = 37.0,
     *,
-    backend: Backend = "vienna",
+    backend: Backend = "linearpartition",
     beam_size: int = 100,
     cutoff: float = 0.0,
     linearpartition_path: str | os.PathLike[str] | None = None,
