@@ -9,7 +9,7 @@ pseudoknot-free Fréchet mean under expected squared mountain loss.
 
 The prediction constraints are fixed parts of the method:
 
-- AU, UA, GC, CG, GU, and UG pairs only;
+- Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs only;
 - minimum hairpin length 3;
 - no pseudoknots.
 
@@ -26,7 +26,7 @@ The stable interface should remain close to:
 
 ```text
 mountain-centroid --seq SEQUENCE
-mountain-centroid --seq SEQUENCE --beam-size 200
+mountain-centroid --seq SEQUENCE --beam-size 100
 mountain-centroid --seq SEQUENCE --bpp-backend linearpartition --bpp-beam-size 100
 ```
 
@@ -52,10 +52,11 @@ beam is large enough; it is not a user-facing inference mode.
 
 Work remaining, in priority order:
 
-1. Add broader randomized invariant tests and quantify optimality agreement as
-   a function of solver beam size on oracle-sized inputs.
-2. Add reproducible ViennaRNA-versus-LinearPartition agreement and runtime
-   benchmarks.
+1. Run and report the reference ViennaRNA pipeline runtime benchmark, separating
+   BPP, profile-construction, and solver time. The solver beam is fixed at 100.
+2. Validate beam-100 agreement on ViennaRNA-derived short profiles. Keep
+   LinearPartition as an optional fast backend rather than expanding the main
+   runtime comparison.
 3. Implement the Boltzmann-sampling rooted-L2 evaluation in the paper analysis
    code, not as an inference mode.
 4. Freeze datasets, versions, seeds, and commands for the TBIO submission.

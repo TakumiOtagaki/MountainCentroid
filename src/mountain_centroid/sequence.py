@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 
-CANONICAL_AND_WOBBLE_PAIRS = frozenset(
+WATSON_CRICK_AND_GU_WOBBLE_PAIRS = frozenset(
     {"AU", "UA", "GC", "CG", "GU", "UG"}
 )
 MIN_HAIRPIN_LENGTH = 3
@@ -24,5 +24,4 @@ def normalise_sequence(sequence: str) -> str:
 
 def can_pair(left: str, right: str) -> bool:
     """Return whether two normalized bases form AU, GC, or GU pairs."""
-    return left + right in CANONICAL_AND_WOBBLE_PAIRS
-
+    return left + right in WATSON_CRICK_AND_GU_WOBBLE_PAIRS

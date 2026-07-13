@@ -18,8 +18,8 @@ The initial implementation was extracted from
 - Compute base-pair probabilities and the expected cut-based mountain height
   with exact ViennaRNA or approximate LinearPartition-V.
 - Search valid structures with a left-to-right beam-pruned solver.
-- Enforce AU/UA, GC/CG, and GU/UG pairing, minimum hairpin length 3, and no
-  pseudoknots during inference.
+- Enforce Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs,
+  minimum hairpin length 3, and no pseudoknots during inference.
 - Report standard dot-bracket notation and the direct squared profile error.
 
 For solver beam size B, candidate generation takes O(nB), and beam sorting makes
@@ -92,6 +92,14 @@ exhaustive optimization with:
 
 ```sh
 uv run python benchmarks/benchmark_optimality.py
+```
+
+The reference end-to-end runtime benchmark separates ViennaRNA BPP calculation,
+expected-profile construction, and Mountain Centroid inference:
+
+```sh
+uv run python benchmarks/benchmark_vienna_pipeline.py \
+  --lengths 50 100 200 400 800 --instances 5 --beam-size 100
 ```
 
 ## Repository layout
