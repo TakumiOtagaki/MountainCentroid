@@ -19,12 +19,18 @@ The initial implementation was extracted from
   with exact ViennaRNA or approximate LinearPartition-V.
 - Find the nearest pseudoknot-free integer mountain path under squared loss.
 - Convert the inferred path to dot-bracket notation.
-- Provide optional experimental MIQP and pseudoknot-aware L1-MILP solvers.
 
 The path DP is exact for the relaxed mountain-path problem. It currently does
 not constrain recovered pairs by nucleotide complementarity or minimum hairpin
 length. Sequence-valid constrained inference will be developed and evaluated
-before the paper is finalized.
+before the paper is finalized. The CLI labels this status explicitly so its
+current output is not mistaken for the final paper method. See `DESIGN.md` for
+the fixed method definition and remaining implementation work.
+
+The public software intentionally has one prediction route. ViennaRNA and
+LinearPartition-V are interchangeable BPP backends for that route, rather than
+different inference modes. Pseudoknot prediction and alternative MIQP/MILP
+objectives are out of scope.
 
 ## Installation
 

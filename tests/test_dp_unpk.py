@@ -10,8 +10,13 @@ def test_zero_profile_produces_unpaired_structure():
 
 
 def test_single_arch_profile_is_recovered():
-    heights, pairs, _ = dp_nearest_mountain([1.0, 1.0, 0.0])
+    mu = [0.8, 1.2, 0.1]
+    heights, pairs, objective = dp_nearest_mountain(mu)
 
     assert heights == [0, 1, 1, 0, 0]
     assert pairs == [(1, 3)]
-
+    direct_squared_error = sum(
+        (height - expected) ** 2
+        for height, expected in zip(heights[1:-1], mu)
+    )
+    assert objective == direct_squared_error

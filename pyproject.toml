@@ -14,7 +14,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-milp = ["PuLP>=2.8"]
 test = ["pytest>=8"]
 
 [project.scripts]
@@ -26,4 +25,3 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-

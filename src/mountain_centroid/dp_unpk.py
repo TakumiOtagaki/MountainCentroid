@@ -6,10 +6,10 @@ dp_unpk.py
 擬似結び目なし（unpk）で μ に最も近い mountain path を L2 厳密 DP で求める。
 """
 from __future__ import annotations
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 
 
-def dp_nearest_mountain(mu: List[float], band: Optional[int] = None) -> Tuple[List[int], List[Tuple[int, int]], float]:
+def dp_nearest_mountain(mu: List[float]) -> Tuple[List[int], List[Tuple[int, int]], float]:
     """
     L2: min_{t} sum_{k=1}^{n-1} (t_k - mu_k)^2
     s.t. t_0=0, t_n=0, t_k>=0, |t_k - t_{k-1}|<=1
@@ -35,14 +35,7 @@ def dp_nearest_mountain(mu: List[float], band: Optional[int] = None) -> Tuple[Li
     for k in range(1, n + 1):
         cur = [INF] * (hmax[k] + 1)
         mu_k = 0.0 if k == n else mu[k - 1]
-        # バンド制限（任意）
-        t_lo = 0
-        t_hi = hmax[k]
-        if band is not None:
-            center = int(round(mu_k))
-            t_lo = max(t_lo, center - band)
-            t_hi = min(t_hi, center + band)
-        for t in range(t_lo, t_hi + 1):
+        for t in range(hmax[k] + 1):
             best_cost = INF
             best_s = None
             # 遷移元 s ∈ {t-1, t, t+1} ∩ [0, hmax[k-1]]
@@ -59,7 +52,6 @@ def dp_nearest_mountain(mu: List[float], band: Optional[int] = None) -> Tuple[Li
         prev = cur
 
     # 終点は t_n=0 を強制
-    obj = prev[0]
     t = [0] * (n + 1)
     t[n] = 0
     for k in range(n, 0, -1):
@@ -78,4 +70,5 @@ def dp_nearest_mountain(mu: List[float], band: Optional[int] = None) -> Tuple[Li
             i = stack.pop()
             pairs.append((i, k))
     pairs.sort()
+    obj = sum((t[k] - mu[k - 1]) ** 2 for k in range(1, n))
     return t, pairs, float(obj)
