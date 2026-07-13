@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mountain-centroid"
+version = "0.1.0"
+description = "Mountain-profile centroid inference for RNA secondary-structure ensembles"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26",
+    "ViennaRNA>=2.7",
+]
+
+[project.optional-dependencies]
+milp = ["PuLP>=2.8"]
+test = ["pytest>=8"]
+
+[project.scripts]
+mountain-centroid = "mountain_centroid.mountain_pipeline:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
