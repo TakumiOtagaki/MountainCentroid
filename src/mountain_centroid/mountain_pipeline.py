@@ -3,7 +3,7 @@
 """
 mountain_pipeline.py
 
-1) ViennaRNA (RNAlib) で base-pair probabilities p_ij を計算し、
+1) ViennaRNA または LinearPartition-V で base-pair probabilities p_ij を計算し、
    ensemble mountain height μ_k = E[h(k)] を取得。
 2) Pseudoknot なし:
    - DP（L2 厳密）で μ に最も近い mountain path を求め、括弧列（dot-bracket）を出力。
@@ -41,11 +41,11 @@ except Exception:  # pragma: no cover - 直実行時のフォールバック
     from formatting import dot_bracket_from_pairs, bracket_with_pseudoknots
 
 # ----------------------------
-# ViennaRNA (RNAlib) で E[h] を計算
+# BPP backend で E[h] を計算
 # ----------------------------
 
-def compute_bpp_and_mu_cli(seq: str, temperature: float = 37.0):
-    return compute_bpp_and_mu(seq, temperature)
+def compute_bpp_and_mu_cli(seq: str, temperature: float = 37.0, **kwargs):
+    return compute_bpp_and_mu(seq, temperature, **kwargs)
 
 
 # ----------------------------
@@ -86,7 +86,21 @@ bracket_with_pseudoknots_cli = bracket_with_pseudoknots
 def main():
     ap = argparse.ArgumentParser(description="E[h]→（非）擬似結び目の構造推定（DP/MIQP/MILP）")
     ap.add_argument("--seq", required=True, help="RNA sequence (A/C/G/U)")
-    ap.add_argument("--temp", type=float, default=37.0, help="ViennaRNA temperature (°C)")
+    ap.add_argument(
+        "--temp",
+        type=float,
+        default=37.0,
+        help="temperature in °C (ViennaRNA only; LinearPartition-V is fixed at 37°C)",
+    )
+    ap.add_argument(
+        "--bpp-backend",
+        choices=("vienna", "linearpartition"),
+        default="vienna",
+        help="BPP backend: exact ViennaRNA (default) or approximate LinearPartition-V",
+    )
+    ap.add_argument("--beam-size", type=int, default=100, help="LinearPartition beam size [default 100]")
+    ap.add_argument("--bpp-cutoff", type=float, default=0.0, help="LinearPartition BPP output cutoff")
+    ap.add_argument("--linearpartition-path", default=None, help="Path to LinearPartition runner script")
     ap.add_argument("--band", type=int, default=None, help="DP のバンド幅（省略で全域）")
     ap.add_argument("--unpk-miqp", action="store_true", help="非疑似結び目 MIQP を実行（Gurobi等がある場合）")
     ap.add_argument("--pk-l1", action="store_true", help="擬似結び目あり L1-MILP を実行")
@@ -102,7 +116,15 @@ def main():
     print(f"# seq (n={n}): {seq}")
 
     # 1) E[h]
-    bpp, mu = compute_bpp_and_mu_cli(seq, temperature=args.temp)
+    bpp, mu = compute_bpp_and_mu_cli(
+        seq,
+        temperature=args.temp,
+        backend=args.bpp_backend,
+        beam_size=args.beam_size,
+        cutoff=args.bpp_cutoff,
+        linearpartition_path=args.linearpartition_path,
+    )
+    print(f"# BPP backend: {args.bpp_backend}")
     print(f"# E[h] length = {len(mu)} (k=1..{n-1})")
     # 先頭数点だけ表示
     preview = ", ".join(f"{x:.3f}" for x in mu[:min(10, len(mu))])

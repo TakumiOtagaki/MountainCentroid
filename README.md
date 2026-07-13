@@ -16,7 +16,7 @@ The initial implementation was extracted from
 ## Current scope
 
 - Compute base-pair probabilities and the expected cut-based mountain height
-  with ViennaRNA.
+  with exact ViennaRNA or approximate LinearPartition-V.
 - Find the nearest pseudoknot-free integer mountain path under squared loss.
 - Convert the inferred path to dot-bracket notation.
 - Provide optional experimental MIQP and pseudoknot-aware L1-MILP solvers.
@@ -32,11 +32,33 @@ before the paper is finalized.
 python -m pip install -e .
 ```
 
+To enable the optional LinearPartition backend, clone recursively and build the
+vendored upstream source:
+
+```sh
+git submodule update --init --recursive
+make -C vendor/LinearPartition
+```
+
 ## Usage
 
 ```sh
 mountain-centroid --seq ACGUACGUACGU
 ```
+
+ViennaRNA remains the default and reference backend. For long sequences,
+LinearPartition-V can be selected with:
+
+```sh
+mountain-centroid \
+  --seq ACGUACGUACGU \
+  --bpp-backend linearpartition \
+  --beam-size 100
+```
+
+LinearPartition uses beam search and therefore approximates the partition
+function and BPPs. Backend and beam size must be reported with experimental
+results; results from the two backends should not be silently pooled.
 
 Equivalent module invocation:
 
@@ -49,5 +71,5 @@ python -m mountain_centroid.mountain_pipeline --seq ACGUACGUACGU
 ```text
 src/mountain_centroid/   reusable implementation and CLI
 tests/                   unit tests for the path DP and formatting
+vendor/LinearPartition/  pinned optional BPP backend (Git submodule)
 ```
-
