@@ -1,7 +1,7 @@
 # MountainCentroid
 
-MountainCentroid projects the expected mountain profile of an RNA secondary-
-structure ensemble onto a discrete, pseudoknot-free mountain path.
+MountainCentroid predicts the sequence-valid, pseudoknot-free RNA secondary
+structure that approximately minimizes expected squared mountain loss.
 
 This repository contains only the reusable implementation. Manuscript sources,
 figures, and paper-specific outputs live in `MountainCentroidPaper`, which pins
@@ -17,15 +17,17 @@ The initial implementation was extracted from
 
 - Compute base-pair probabilities and the expected cut-based mountain height
   with exact ViennaRNA or approximate LinearPartition-V.
-- Find the nearest pseudoknot-free integer mountain path under squared loss.
-- Convert the inferred path to dot-bracket notation.
+- Search valid structures with a left-to-right beam-pruned solver.
+- Enforce AU/UA, GC/CG, and GU/UG pairing, minimum hairpin length 3, and no
+  pseudoknots during inference.
+- Report standard dot-bracket notation and the direct squared profile error.
 
-The path DP is exact for the relaxed mountain-path problem. It currently does
-not constrain recovered pairs by nucleotide complementarity or minimum hairpin
-length. Sequence-valid constrained inference will be developed and evaluated
-before the paper is finalized. The CLI labels this status explicitly so its
-current output is not mistaken for the final paper method. See `DESIGN.md` for
-the fixed method definition and remaining implementation work.
+For solver beam size B, candidate generation takes O(nB), and beam sorting makes
+the current Python implementation O(n B log B). With a fixed B it is linear in
+sequence length. Persistent stack states make each open/close transition O(1),
+avoiding tuple copies proportional to nesting depth. Beam pruning is an
+approximation to the mathematical Fréchet mean; larger beams retain more prefix
+states. The default is B=100.
 
 The public software intentionally has one prediction route. ViennaRNA and
 LinearPartition-V are interchangeable BPP backends for that route, rather than
@@ -52,6 +54,12 @@ make -C vendor/LinearPartition
 mountain-centroid --seq ACGUACGUACGU
 ```
 
+The solver beam can be changed without selecting a different method:
+
+```sh
+mountain-centroid --seq ACGUACGUACGU --beam-size 200
+```
+
 ViennaRNA remains the default and reference backend. For long sequences,
 LinearPartition-V can be selected with:
 
@@ -59,7 +67,7 @@ LinearPartition-V can be selected with:
 mountain-centroid \
   --seq ACGUACGUACGU \
   --bpp-backend linearpartition \
-  --beam-size 100
+  --bpp-beam-size 100
 ```
 
 LinearPartition uses beam search and therefore approximates the partition
@@ -72,10 +80,25 @@ Equivalent module invocation:
 python -m mountain_centroid.mountain_pipeline --seq ACGUACGUACGU
 ```
 
+Solver-only scaling can be measured reproducibly with:
+
+```sh
+uv run python benchmarks/benchmark_solver.py \
+  --lengths 100 300 1000 3000 --beam-size 100 --repeats 3
+```
+
+Approximation quality on synthetic short instances can be checked against
+exhaustive optimization with:
+
+```sh
+uv run python benchmarks/benchmark_optimality.py
+```
+
 ## Repository layout
 
 ```text
 src/mountain_centroid/   reusable implementation and CLI
-tests/                   unit tests for the path DP and formatting
+tests/                   constraints, exact-oracle, backend, and formatting tests
+benchmarks/              reproducible solver scaling benchmark
 vendor/LinearPartition/  pinned optional BPP backend (Git submodule)
 ```

@@ -15,19 +15,13 @@ import numpy as np
 
 try:
     from .utils_tri import tri_to_full
+    from .sequence import normalise_sequence
 except Exception:
     from utils_tri import tri_to_full
+    from sequence import normalise_sequence
 
 
 Backend = Literal["vienna", "linearpartition"]
-
-
-def _normalise_sequence(seq: str) -> str:
-    seq = seq.upper().replace("T", "U")
-    invalid = sorted(set(seq) - set("ACGU"))
-    if invalid:
-        raise ValueError(f"Sequence contains unsupported symbols: {''.join(invalid)}")
-    return seq
 
 
 def mountain_expectation_from_bpp(bpp: np.ndarray) -> List[float]:
@@ -55,7 +49,7 @@ def compute_bpp_vienna(seq: str, temperature: float = 37.0) -> np.ndarray:
     """Compute an exact thermodynamic BPP matrix with ViennaRNA/RNAlib."""
     import RNA  # ViennaRNA の Python バインディング
 
-    seq = _normalise_sequence(seq)
+    seq = normalise_sequence(seq)
     n = len(seq)
     if n < 2:
         return np.zeros((n, n), dtype=float)
@@ -107,7 +101,7 @@ def compute_bpp_linearpartition(
     LinearPartition writes probabilities with five decimal places. Missing
     entries (including pairs pruned by the beam or cutoff) are treated as zero.
     """
-    seq = _normalise_sequence(seq)
+    seq = normalise_sequence(seq)
     n = len(seq)
     if n < 2:
         return np.zeros((n, n), dtype=float)
