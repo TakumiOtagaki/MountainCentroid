@@ -17,17 +17,18 @@ The initial implementation was extracted from
 
 - Compute base-pair probabilities and the expected cut-based mountain height
   with default LinearPartition-V or optional exact ViennaRNA.
-- Search valid structures with a left-to-right beam-pruned solver.
+- Search valid structures with bidirectional beam-pruned scans and retain the
+  lower-loss result.
 - Enforce Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs,
   minimum hairpin length 3, and no pseudoknots during inference.
 - Report standard dot-bracket notation and the direct squared profile error.
 
-For solver beam size B, candidate generation takes O(nB), and beam sorting makes
-the current Python implementation O(n B log B). With a fixed B it is linear in
-sequence length. Persistent stack states make each open/close transition O(1),
-avoiding tuple copies proportional to nesting depth. Beam pruning is an
-approximation to the mathematical Fréchet mean; larger beams retain more prefix
-states. The default is B=100.
+For solver beam size B, each directional scan generates O(nB) candidates, and
+beam sorting makes the current Python implementation O(n B log B). With a
+fixed B it is linear in sequence length. Persistent stack states make each
+open/close transition O(1), avoiding tuple copies proportional to nesting
+depth. Beam pruning is an approximation to the mathematical Fréchet mean;
+larger beams retain more prefix states. The default is B=100.
 
 The public software intentionally has one prediction route. LinearPartition-V
 is the default fast BPP backend; ViennaRNA is an optional exact backend for the

@@ -4,7 +4,10 @@ import pytest
 
 import mountain_centroid.api as api
 from mountain_centroid import predict_from_profile
-from mountain_centroid.beam import beam_mountain_centroid
+from mountain_centroid.beam import (
+    _beam_mountain_centroid_one_direction,
+    beam_mountain_centroid,
+)
 from mountain_centroid.formatting import pairs_from_bracket
 from mountain_centroid.sequence import MIN_HAIRPIN_LENGTH, can_pair
 
@@ -170,6 +173,40 @@ def test_beam_100_preserves_long_range_nested_5s_profile():
 
     assert result.structure == target_structure
     assert result.squared_error == 0.0
+
+
+def test_bidirectional_search_selects_the_better_scan_direction():
+    sequence = "GCUACGGAGUGGCUAGCCAGCGGUAGAGCGCCUGCUUAGCAGGCAACUAGC"
+    mu = [
+        0.2 + ((index * 17) % 31) / 10
+        for index in range(len(sequence) - 1)
+    ]
+    forward = _beam_mountain_centroid_one_direction(
+        sequence,
+        mu,
+        beam_size=20,
+    )
+    reverse = _beam_mountain_centroid_one_direction(
+        sequence[::-1],
+        tuple(reversed(mu)),
+        beam_size=20,
+    )
+
+    result = beam_mountain_centroid(sequence, mu, beam_size=20)
+
+    assert reverse.squared_error < forward.squared_error
+    expected_structure = reverse.structure[::-1].translate(
+        str.maketrans("()", ")("),
+    )
+    expected_heights = tuple(reversed(reverse.heights))
+    direct_error = sum(
+        (height - expected) ** 2
+        for height, expected in zip(expected_heights[1:-1], mu)
+    )
+    assert result.structure == expected_structure
+    assert list(result.pairs) == pairs_from_bracket(result.structure)
+    assert result.heights == expected_heights
+    assert result.squared_error == pytest.approx(direct_error)
 
 
 @pytest.mark.parametrize("beam_size", [0, -1, True, 1.5])

@@ -78,13 +78,13 @@ def _prune_with_depth_diversity(
     return selected
 
 
-def beam_mountain_centroid(
+def _beam_mountain_centroid_one_direction(
     sequence: str,
     expected_heights: Sequence[float],
     *,
     beam_size: int = 100,
 ) -> BeamResult:
-    """Minimize squared mountain loss with sequence-valid beam search.
+    """Run the sequence-valid beam search in one scan direction.
 
     The search scans the sequence from left to right. Its state is the stack of
     currently open base pairs, which makes every emitted structure
@@ -230,5 +230,58 @@ def beam_mountain_centroid(
         structure=structure,
         pairs=tuple(pairs),
         heights=tuple(heights),
+        squared_error=float(squared_error),
+    )
+
+
+def beam_mountain_centroid(
+    sequence: str,
+    expected_heights: Sequence[float],
+    *,
+    beam_size: int = 100,
+) -> BeamResult:
+    """Minimize squared mountain loss with bidirectional beam pruning.
+
+    A left-to-right scan can lose a useful set of opening positions before its
+    distant closing partners are visible. The equivalent reversed problem has
+    the same objective and structural constraints but exposes those partners in
+    the opposite order. Running both directions and retaining the lower-loss
+    result substantially reduces directional pruning failures while preserving
+    O(n B log B) time for a fixed beam size B.
+
+    The returned structure is pseudoknot-free, uses only canonical
+    Watson-Crick or GU wobble pairs, and enforces the minimum hairpin length.
+    Beam pruning makes it an approximation to the sequence-constrained
+    Frechet mean.
+    """
+    forward = _beam_mountain_centroid_one_direction(
+        sequence,
+        expected_heights,
+        beam_size=beam_size,
+    )
+    reverse = _beam_mountain_centroid_one_direction(
+        sequence[::-1],
+        tuple(reversed(expected_heights)),
+        beam_size=beam_size,
+    )
+    reverse_structure = reverse.structure[::-1].translate(
+        str.maketrans("()", ")("),
+    )
+    if reverse.squared_error >= forward.squared_error:
+        return forward
+
+    n = len(reverse_structure)
+    pairs = tuple(
+        sorted((n + 1 - right, n + 1 - left) for left, right in reverse.pairs)
+    )
+    heights = tuple(reversed(reverse.heights))
+    squared_error = sum(
+        (heights[k] - float(expected_heights[k - 1])) ** 2
+        for k in range(1, n)
+    )
+    return BeamResult(
+        structure=reverse_structure,
+        pairs=pairs,
+        heights=heights,
         squared_error=float(squared_error),
     )
