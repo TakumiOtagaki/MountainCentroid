@@ -6,8 +6,8 @@ from dataclasses import dataclass
 import os
 from typing import Sequence
 
-from .beam import beam_mountain_centroid
 from .bpp_mu import Backend, compute_bpp_and_mu
+from .cpp_constrained import cpp_sequence_constrained_mountain_centroid
 from .sequence import normalise_sequence
 
 
@@ -19,7 +19,7 @@ class Prediction:
     mountain_heights: tuple[int, ...]
     expected_mountain_heights: tuple[float, ...]
     squared_mountain_error: float
-    solver_beam_size: int
+    solver_backend: str
     bpp_backend: str
 
 
@@ -27,15 +27,15 @@ def predict_from_profile(
     sequence: str,
     expected_heights: Sequence[float],
     *,
-    beam_size: int = 100,
+    constrained_executable: str | os.PathLike[str] | None = None,
     bpp_backend: str = "provided",
 ) -> Prediction:
     """Predict one valid structure from an already computed mean profile."""
     sequence = normalise_sequence(sequence)
-    result = beam_mountain_centroid(
+    result = cpp_sequence_constrained_mountain_centroid(
         sequence,
         expected_heights,
-        beam_size=beam_size,
+        executable=constrained_executable,
     )
     return Prediction(
         sequence=sequence,
@@ -44,7 +44,7 @@ def predict_from_profile(
         mountain_heights=result.heights,
         expected_mountain_heights=tuple(float(x) for x in expected_heights),
         squared_mountain_error=result.squared_error,
-        solver_beam_size=beam_size,
+        solver_backend="cpp_interval_depth_dp",
         bpp_backend=bpp_backend,
     )
 
@@ -54,12 +54,12 @@ def predict(
     *,
     temperature: float = 37.0,
     bpp_backend: Backend = "linearpartition",
-    beam_size: int = 100,
     bpp_beam_size: int = 100,
     bpp_cutoff: float = 0.0,
     linearpartition_path: str | os.PathLike[str] | None = None,
+    constrained_executable: str | os.PathLike[str] | None = None,
 ) -> Prediction:
-    """Compute BPPs and return the beam-pruned Mountain Centroid prediction."""
+    """Compute BPPs and return the sequence-constrained Mountain Centroid."""
     sequence = normalise_sequence(sequence)
     _, expected_heights = compute_bpp_and_mu(
         sequence,
@@ -72,6 +72,6 @@ def predict(
     return predict_from_profile(
         sequence,
         expected_heights,
-        beam_size=beam_size,
         bpp_backend=bpp_backend,
+        constrained_executable=constrained_executable,
     )

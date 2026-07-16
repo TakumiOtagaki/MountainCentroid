@@ -4,35 +4,39 @@ from pathlib import Path
 
 import pytest
 
-from mountain_centroid.cpp_exact import cpp_exact_mountain_centroid
-from mountain_centroid.exact import exact_mountain_centroid
+from mountain_centroid.constrained import sequence_constrained_mountain_centroid
+from mountain_centroid.cpp_constrained import (
+    cpp_sequence_constrained_mountain_centroid,
+)
 
 
 @pytest.fixture(scope="session")
-def cpp_exact_binary() -> Path:
+def cpp_constrained_binary() -> Path:
     repository = Path(__file__).resolve().parents[1]
     subprocess.run(
-        ["make", "exact"],
+        ["make", "constrained"],
         cwd=repository,
         check=True,
         capture_output=True,
         text=True,
     )
-    return repository / "bin" / "exact_mountain_centroid"
+    return repository / "bin" / "sequence_constrained_mountain_centroid"
 
 
-def test_cpp_matches_python_exact_on_random_instances(cpp_exact_binary):
+def test_cpp_matches_python_constrained_on_random_instances(
+    cpp_constrained_binary,
+):
     rng = random.Random(41)
     for _ in range(80):
         n = rng.randint(5, 30)
         sequence = "".join(rng.choice("ACGU") for _ in range(n))
         mu = [rng.random() * min(cut, n - cut, 6) for cut in range(1, n)]
 
-        python_result = exact_mountain_centroid(sequence, mu)
-        cpp_result = cpp_exact_mountain_centroid(
+        python_result = sequence_constrained_mountain_centroid(sequence, mu)
+        cpp_result = cpp_sequence_constrained_mountain_centroid(
             sequence,
             mu,
-            executable=cpp_exact_binary,
+            executable=cpp_constrained_binary,
         )
 
         assert cpp_result.structure == python_result.structure
@@ -46,18 +50,18 @@ def test_cpp_matches_python_exact_on_random_instances(cpp_exact_binary):
         assert cpp_result.diagnostics == python_result.diagnostics
 
 
-def test_cpp_normalizes_dna_input(cpp_exact_binary):
-    result = cpp_exact_mountain_centroid(
+def test_cpp_normalizes_dna_input(cpp_constrained_binary):
+    result = cpp_sequence_constrained_mountain_centroid(
         "gaaAt",
         [1.0, 1.0, 1.0, 1.0],
-        executable=cpp_exact_binary,
+        executable=cpp_constrained_binary,
     )
     assert result.structure == "(...)"
 
 
 def test_cpp_wrapper_rejects_missing_binary(tmp_path):
-    with pytest.raises(FileNotFoundError, match="make exact"):
-        cpp_exact_mountain_centroid(
+    with pytest.raises(FileNotFoundError, match="make constrained"):
+        cpp_sequence_constrained_mountain_centroid(
             "GAAAU",
             [1.0] * 4,
             executable=tmp_path / "missing",

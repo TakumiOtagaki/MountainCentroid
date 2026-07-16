@@ -12,7 +12,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
             "Sequence-constrained, pseudoknot-free Mountain Centroid "
-            "prediction with beam pruning"
+            "prediction"
         )
     )
     parser.add_argument("--seq", required=True, help="RNA sequence (A/C/G/U)")
@@ -26,16 +26,10 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--beam-size",
-        type=int,
-        default=100,
-        help="Mountain Centroid solver beam size [default 100]",
-    )
-    parser.add_argument(
         "--bpp-backend",
         choices=("vienna", "linearpartition"),
         default="linearpartition",
-        help="BPP backend: LinearPartition-V (default) or exact ViennaRNA",
+        help="BPP backend: LinearPartition-V (default) or ViennaRNA",
     )
     parser.add_argument(
         "--bpp-beam-size",
@@ -54,16 +48,21 @@ def main() -> None:
         default=None,
         help="path to the LinearPartition runner script",
     )
+    parser.add_argument(
+        "--constrained-executable",
+        default=None,
+        help="path to the compiled sequence-constrained solver",
+    )
     args = parser.parse_args()
 
     prediction = predict(
         args.seq,
         temperature=args.temp,
         bpp_backend=args.bpp_backend,
-        beam_size=args.beam_size,
         bpp_beam_size=args.bpp_beam_size,
         bpp_cutoff=args.bpp_cutoff,
         linearpartition_path=args.linearpartition_path,
+        constrained_executable=args.constrained_executable,
     )
 
     preview = ", ".join(
@@ -74,7 +73,7 @@ def main() -> None:
 
     print(f"# sequence (n={len(prediction.sequence)}): {prediction.sequence}")
     print(f"# BPP backend: {prediction.bpp_backend}")
-    print(f"# solver: sequence-constrained beam search (B={args.beam_size})")
+    print("# solver: sequence-constrained interval-depth DP (C++)")
     print(f"# E[h] preview: [{preview}]")
     print(
         "squared_mountain_error =",

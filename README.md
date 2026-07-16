@@ -1,13 +1,13 @@
 # MountainCentroid
 
-MountainCentroid exposes two exact prediction spaces for expected squared
+MountainCentroid exposes two prediction spaces for expected squared
 mountain loss: a relaxed projection onto mountain paths and a sequence-valid,
-pseudoknot-free projection. The exact constrained solver is implemented in
-both Python and C++; the Python implementation serves as a readable oracle.
+pseudoknot-free projection. The sequence-constrained solver is implemented in
+both Python and C++; the Python implementation serves as a readable reference.
 
 This repository contains only the reusable implementation. Manuscript sources,
 figures, and paper-specific outputs live in `MountainCentroidPaper`, which pins
-the exact software revision as a Git submodule.
+the software revision as a Git submodule.
 
 ## Provenance
 
@@ -17,26 +17,25 @@ The initial implementation was extracted from
 
 ## Current scope
 
-- Compute the exact relaxed Mountain Centroid with a position-height dynamic
+- Compute the relaxed Mountain Centroid with a position-height dynamic
   program. This variant does not enforce pairability or minimum hairpin length.
-- Compute the exact sequence-constrained Mountain Centroid with an
+- Compute the sequence-constrained Mountain Centroid with an
   interval--external-depth dynamic program in `O(D_eff n^3)` time and
   `O(D_eff n^2)` memoization space (`O(n^4)` and `O(n^3)` worst case).
 - Compute base-pair probabilities and the expected cut-based mountain height
-  with default LinearPartition-V or optional exact ViennaRNA.
+  with default LinearPartition-V or optional ViennaRNA.
 - Enforce Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs,
   minimum hairpin length 3, and no pseudoknots during inference.
 - Report standard dot-bracket notation and the direct squared profile error.
 
-The older bidirectional beam implementation remains available for engineering
-comparisons, but it is not the exact estimator used for the manuscript's
-constrained results. LinearPartition beam pruning is a separate upstream
-approximation to the BPP-derived expected profile.
+Both projection algorithms return their global optima. LinearPartition beam
+pruning is a separate upstream approximation to the BPP-derived expected
+profile.
 
-The exact solvers are available as the Python APIs
-`relaxed_mountain_centroid`, `exact_mountain_centroid`, and
-`cpp_exact_mountain_centroid`. The existing command-line prediction route is
-retained for compatibility and still exposes the beam implementation.
+The solvers are available as the Python APIs
+`relaxed_mountain_centroid`, `sequence_constrained_mountain_centroid`, and
+`cpp_sequence_constrained_mountain_centroid`. The command-line route uses the
+C++ sequence-constrained solver.
 Pseudoknot prediction and alternative MIQP/MILP objectives are out of scope.
 
 ## Installation
@@ -51,19 +50,13 @@ vendored upstream source:
 ```sh
 git submodule update --init --recursive
 make -C vendor/LinearPartition
-make exact
+make constrained
 ```
 
 ## Usage
 
 ```sh
 mountain-centroid --seq ACGUACGUACGU
-```
-
-The solver beam can be changed without selecting a different method:
-
-```sh
-mountain-centroid --seq ACGUACGUACGU --beam-size 200
 ```
 
 LinearPartition-V is the default:
@@ -74,7 +67,7 @@ mountain-centroid \
   --bpp-beam-size 100
 ```
 
-The optional exact ViennaRNA backend can be selected with:
+The optional ViennaRNA partition-function backend can be selected with:
 
 ```sh
 mountain-centroid --seq ACGUACGUACGU --bpp-backend vienna
@@ -90,40 +83,26 @@ Equivalent module invocation:
 python -m mountain_centroid.mountain_pipeline --seq ACGUACGUACGU
 ```
 
-Solver-only scaling can be measured reproducibly with:
+The production Python-to-C++ constrained route can be benchmarked with:
 
 ```sh
-uv run python benchmarks/benchmark_solver.py \
-  --lengths 100 300 1000 3000 --beam-size 100 --repeats 3
-```
-
-The production Python-to-C++ exact route can be benchmarked with:
-
-```sh
-uv run python benchmarks/benchmark_cpp_exact.py \
+uv run python benchmarks/benchmark_sequence_constrained.py \
   --lengths 30 50 100 150 200 300 --instances 3
 ```
 
-Approximation quality on synthetic short instances can be checked against
-exhaustive optimization with:
-
-```sh
-uv run python benchmarks/benchmark_optimality.py
-```
-
-An optional exact-backend timing benchmark separates ViennaRNA BPP calculation,
+An optional backend timing benchmark separates ViennaRNA BPP calculation,
 expected-profile construction, and Mountain Centroid inference:
 
 ```sh
 uv run python benchmarks/benchmark_vienna_pipeline.py \
-  --lengths 50 100 200 400 800 --instances 5 --beam-size 100
+  --lengths 50 100 200 400 800 --instances 5
 ```
 
 ## Repository layout
 
 ```text
 src/mountain_centroid/   reusable implementation and CLI
-tests/                   constraints, exact-oracle, backend, and formatting tests
+tests/                   constraints, exhaustive-oracle, backend, and formatting tests
 benchmarks/              reproducible solver scaling benchmark
 vendor/LinearPartition/  pinned default BPP backend (Git submodule)
 ```

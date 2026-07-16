@@ -1,4 +1,4 @@
-"""Exact projection onto unconstrained nonnegative mountain paths."""
+"""Relaxed projection onto unconstrained nonnegative mountain paths."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from typing import Sequence
 
 @dataclass(frozen=True, slots=True)
 class RelaxedResult:
-    """Exact relaxed Mountain Centroid result."""
+    """Relaxed Mountain Centroid result."""
 
     structure: str
     pairs: tuple[tuple[int, int], ...]
@@ -18,7 +18,7 @@ class RelaxedResult:
 
 
 def relaxed_mountain_centroid(expected_heights: Sequence[float]) -> RelaxedResult:
-    """Return the exact closest nonnegative unit-step mountain path.
+    """Return the globally optimal nonnegative unit-step mountain path.
 
     This relaxation does not enforce sequence complementarity or a minimum
     hairpin length.  For sequence length n, the dynamic program has O(n^2)

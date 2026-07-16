@@ -69,9 +69,10 @@ struct Layer {
   std::vector<int> decisions;
 };
 
-class ExactSolver {
+class SequenceConstrainedSolver {
  public:
-  ExactSolver(std::string sequence, std::vector<double> expected_heights)
+  SequenceConstrainedSolver(
+      std::string sequence, std::vector<double> expected_heights)
       : sequence_(NormalizeSequence(std::move(sequence))),
         expected_heights_(std::move(expected_heights)),
         length_(static_cast<int>(sequence_.size())),
@@ -219,7 +220,7 @@ int main() {
       expected_heights.push_back(value);
     }
 
-    ExactSolver solver(sequence, std::move(expected_heights));
+    SequenceConstrainedSolver solver(sequence, std::move(expected_heights));
     solver.Run();
     std::cout << solver.structure() << '\n'
               << std::setprecision(17) << solver.squared_error() << '\n'
@@ -228,7 +229,8 @@ int main() {
               << solver.effective_depth_levels() << '\n';
     return 0;
   } catch (const std::exception& error) {
-    std::cerr << "exact_mountain_centroid: " << error.what() << '\n';
+    std::cerr << "sequence_constrained_mountain_centroid: " << error.what()
+              << '\n';
     return 2;
   }
 }

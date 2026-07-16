@@ -11,10 +11,12 @@ import time
 
 import RNA
 
-from mountain_centroid.beam import beam_mountain_centroid
 from mountain_centroid.bpp_mu import (
     compute_bpp_vienna,
     mountain_expectation_from_bpp,
+)
+from mountain_centroid.cpp_constrained import (
+    cpp_sequence_constrained_mountain_centroid,
 )
 
 
@@ -28,7 +30,7 @@ def main() -> None:
     )
     parser.add_argument("--instances", type=int, default=5)
     parser.add_argument("--repeats", type=int, default=1)
-    parser.add_argument("--beam-size", type=int, default=100)
+    parser.add_argument("--constrained-executable")
     parser.add_argument("--temperature", type=float, default=37.0)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--no-warmup", action="store_true")
@@ -46,10 +48,10 @@ def main() -> None:
             temperature=args.temperature,
         )
         warmup_mu = mountain_expectation_from_bpp(warmup_bpp)
-        beam_mountain_centroid(
+        cpp_sequence_constrained_mountain_centroid(
             warmup_sequence,
             warmup_mu,
-            beam_size=args.beam_size,
+            executable=args.constrained_executable,
         )
 
     print(f"# platform={platform.platform()}")
@@ -58,7 +60,7 @@ def main() -> None:
     print(f"# temperature_c={args.temperature}")
     print(f"# master_seed={args.seed}")
     print(
-        "length,instance,repeat,sequence_seed,beam_size,"
+        "length,instance,repeat,sequence_seed,"
         "vienna_bpp_seconds,profile_seconds,solver_seconds,total_seconds,pairs"
     )
 
@@ -86,17 +88,17 @@ def main() -> None:
                 profile_seconds = time.perf_counter() - started
 
                 started = time.perf_counter()
-                result = beam_mountain_centroid(
+                result = cpp_sequence_constrained_mountain_centroid(
                     sequence,
                     expected_heights,
-                    beam_size=args.beam_size,
+                    executable=args.constrained_executable,
                 )
                 solver_seconds = time.perf_counter() - started
 
                 total_seconds = time.perf_counter() - total_started
                 print(
                     f"{length},{instance},{repeat},{sequence_seed},"
-                    f"{args.beam_size},{bpp_seconds:.9f},"
+                    f"{bpp_seconds:.9f},"
                     f"{profile_seconds:.9f},{solver_seconds:.9f},"
                     f"{total_seconds:.9f},{len(result.pairs)}",
                     flush=True,

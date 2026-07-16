@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Benchmark the production Python-to-C++ exact-solver route."""
+"""Benchmark the production C++ sequence-constrained route."""
 
 from __future__ import annotations
 
@@ -10,9 +10,9 @@ import resource
 import statistics
 import time
 
-from mountain_centroid.cpp_exact import (
-    cpp_exact_mountain_centroid,
-    default_cpp_exact_path,
+from mountain_centroid.cpp_constrained import (
+    cpp_sequence_constrained_mountain_centroid,
+    default_cpp_constrained_path,
 )
 
 
@@ -47,7 +47,9 @@ def main() -> None:
         choices=("random", "pair_dense"),
         default=("random", "pair_dense"),
     )
-    parser.add_argument("--executable", type=Path, default=default_cpp_exact_path())
+    parser.add_argument(
+        "--executable", type=Path, default=default_cpp_constrained_path()
+    )
     args = parser.parse_args()
 
     if args.instances < 1:
@@ -74,7 +76,7 @@ def main() -> None:
                     instance_seed,
                 )
                 started = time.perf_counter()
-                result = cpp_exact_mountain_centroid(
+                result = cpp_sequence_constrained_mountain_centroid(
                     sequence,
                     expected_heights,
                     executable=args.executable,

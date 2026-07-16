@@ -4,7 +4,7 @@ import random
 import pytest
 
 from mountain_centroid.relaxed import relaxed_mountain_centroid
-from mountain_centroid.beam import beam_mountain_centroid
+from mountain_centroid.constrained import sequence_constrained_mountain_centroid
 
 
 def _exhaustive(mu):
@@ -21,7 +21,7 @@ def _exhaustive(mu):
     return best[0]
 
 
-def test_relaxed_recovers_exact_nested_path():
+def test_relaxed_recovers_nested_path():
     result = relaxed_mountain_centroid([1, 2, 3, 3, 3, 3, 2, 1])
     assert result.structure == "(((...)))"
     assert result.heights == (0, 1, 2, 3, 3, 3, 3, 2, 1, 0)
@@ -46,5 +46,5 @@ def test_relaxed_objective_is_a_lower_bound_for_constrained_prediction():
     sequence = "GGGAAACCC"
     mu = [0.4, 1.3, 2.2, 2.8, 2.7, 2.0, 1.1, 0.3]
     relaxed = relaxed_mountain_centroid(mu)
-    constrained = beam_mountain_centroid(sequence, mu, beam_size=100)
+    constrained = sequence_constrained_mountain_centroid(sequence, mu)
     assert relaxed.squared_error <= constrained.squared_error

@@ -46,7 +46,7 @@ def mountain_expectation_from_bpp(bpp: np.ndarray) -> List[float]:
 
 
 def compute_bpp_vienna(seq: str, temperature: float = 37.0) -> np.ndarray:
-    """Compute an exact thermodynamic BPP matrix with ViennaRNA/RNAlib."""
+    """Compute a thermodynamic BPP matrix with ViennaRNA/RNAlib."""
     import RNA  # ViennaRNA の Python バインディング
 
     seq = normalise_sequence(seq)

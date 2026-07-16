@@ -6,7 +6,7 @@ from .formatting import pairs_from_bracket
 
 
 def base_pair_f1(predicted: str, reference: str) -> float:
-    """Return exact-match base-pair F1 for two dot-bracket structures."""
+    """Return base-pair F1 for two dot-bracket structures."""
     if len(predicted) != len(reference):
         raise ValueError("Structures must have the same length")
     predicted_pairs = set(pairs_from_bracket(predicted))

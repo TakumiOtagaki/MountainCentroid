@@ -9,7 +9,7 @@ from mountain_centroid.evaluation import (
 )
 
 
-def test_base_pair_f1_uses_exact_pairs():
+def test_base_pair_f1_uses_pair_endpoints():
     assert base_pair_f1("((...))", "((...))") == 1.0
     assert base_pair_f1("(.....)", ".(...).") == 0.0
 

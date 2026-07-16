@@ -1,4 +1,4 @@
-"""Exact sequence-constrained mountain-profile projection."""
+"""Sequence-constrained mountain-profile projection."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from .sequence import MIN_HAIRPIN_LENGTH, can_pair, normalise_sequence
 
 
 @dataclass(frozen=True, slots=True)
-class ExactDiagnostics:
-    """Dynamic-programming work performed for one exact projection."""
+class ConstrainedDiagnostics:
+    """Dynamic-programming work performed for one constrained projection."""
 
     states_evaluated: int
     partner_transitions_evaluated: int
@@ -25,21 +25,21 @@ class ExactDiagnostics:
 
 
 @dataclass(frozen=True, slots=True)
-class ExactResult:
-    """Exact sequence-constrained Mountain Centroid result."""
+class ConstrainedResult:
+    """Sequence-constrained Mountain Centroid result."""
 
     structure: str
     pairs: tuple[tuple[int, int], ...]
     heights: tuple[int, ...]
     squared_error: float
-    diagnostics: ExactDiagnostics
+    diagnostics: ConstrainedDiagnostics
 
 
-def exact_mountain_centroid(
+def sequence_constrained_mountain_centroid(
     sequence: str,
     expected_heights: Sequence[float],
-) -> ExactResult:
-    """Return the exact sequence-valid projection of an expected profile.
+) -> ConstrainedResult:
+    """Return the globally optimal sequence-valid profile projection.
 
     The interval state ``F(i, j, d)`` stores the best cost within ``[i, j]``
     when ``d`` outside pairs enclose the interval.  Only states reachable from
@@ -154,12 +154,12 @@ def exact_mountain_centroid(
             depth -= 1
         heights.append(depth)
 
-    return ExactResult(
+    return ConstrainedResult(
         structure="".join(characters),
         pairs=tuple(pairs),
         heights=tuple(heights),
         squared_error=float(squared_error),
-        diagnostics=ExactDiagnostics(
+        diagnostics=ConstrainedDiagnostics(
             states_evaluated=states_evaluated,
             partner_transitions_evaluated=partner_transitions_evaluated,
             maximum_external_depth=maximum_external_depth,

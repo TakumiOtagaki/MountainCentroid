@@ -1,10 +1,10 @@
 CXX ?= g++
 CXXFLAGS ?= -O3 -DNDEBUG -std=c++17 -Wall -Wextra -Wpedantic
 
-.PHONY: exact
+.PHONY: constrained
 
-exact: bin/exact_mountain_centroid
+constrained: bin/sequence_constrained_mountain_centroid
 
-bin/exact_mountain_centroid: cpp/exact_mountain_centroid.cpp
+bin/sequence_constrained_mountain_centroid: cpp/sequence_constrained_mountain_centroid.cpp
 	mkdir -p bin
 	$(CXX) $(CXXFLAGS) $< -o $@

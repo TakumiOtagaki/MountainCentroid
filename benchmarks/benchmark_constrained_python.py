@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reproducible time and memory benchmark for the exact constrained solver."""
+"""Benchmark the Python sequence-constrained dynamic program."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import statistics
 import time
 import tracemalloc
 
-from mountain_centroid.exact import exact_mountain_centroid
+from mountain_centroid.constrained import sequence_constrained_mountain_centroid
 
 
 def make_instance(
@@ -75,14 +75,18 @@ def main() -> None:
             )
 
             started = time.perf_counter()
-            result = exact_mountain_centroid(sequence, expected_heights)
+            result = sequence_constrained_mountain_centroid(
+                sequence, expected_heights
+            )
             elapsed = time.perf_counter() - started
             elapsed_by_profile[profile].append(elapsed)
 
             heap_peak_mib: float | None = None
             if args.measure_python_heap:
                 tracemalloc.start()
-                exact_mountain_centroid(sequence, expected_heights)
+                sequence_constrained_mountain_centroid(
+                    sequence, expected_heights
+                )
                 _, heap_peak = tracemalloc.get_traced_memory()
                 tracemalloc.stop()
                 heap_peak_mib = heap_peak / 1024**2

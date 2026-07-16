@@ -7,22 +7,26 @@ from .evaluation import (
     normalized_squared_mountain_distance,
     squared_mountain_distance,
 )
-from .cpp_exact import cpp_exact_mountain_centroid
-from .exact import ExactDiagnostics, ExactResult, exact_mountain_centroid
+from .constrained import (
+    ConstrainedDiagnostics,
+    ConstrainedResult,
+    sequence_constrained_mountain_centroid,
+)
+from .cpp_constrained import cpp_sequence_constrained_mountain_centroid
 from .relaxed import RelaxedResult, relaxed_mountain_centroid
 
 __all__ = [
     "Prediction",
-    "ExactDiagnostics",
-    "ExactResult",
+    "ConstrainedDiagnostics",
+    "ConstrainedResult",
     "RelaxedResult",
     "base_pair_f1",
-    "cpp_exact_mountain_centroid",
-    "exact_mountain_centroid",
+    "cpp_sequence_constrained_mountain_centroid",
     "mean_squared_mountain_distance",
     "normalized_squared_mountain_distance",
     "predict",
     "predict_from_profile",
     "relaxed_mountain_centroid",
+    "sequence_constrained_mountain_centroid",
     "squared_mountain_distance",
 ]
