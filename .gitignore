@@ -6,4 +6,4 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
-
+bin/exact_mountain_centroid

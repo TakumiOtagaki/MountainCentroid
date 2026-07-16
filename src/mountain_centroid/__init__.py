@@ -7,6 +7,7 @@ from .evaluation import (
     normalized_squared_mountain_distance,
     squared_mountain_distance,
 )
+from .cpp_exact import cpp_exact_mountain_centroid
 from .exact import ExactDiagnostics, ExactResult, exact_mountain_centroid
 from .relaxed import RelaxedResult, relaxed_mountain_centroid
 
@@ -16,6 +17,7 @@ __all__ = [
     "ExactResult",
     "RelaxedResult",
     "base_pair_f1",
+    "cpp_exact_mountain_centroid",
     "exact_mountain_centroid",
     "mean_squared_mountain_distance",
     "normalized_squared_mountain_distance",
