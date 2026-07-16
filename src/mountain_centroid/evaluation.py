@@ -60,3 +60,20 @@ def mean_squared_mountain_distance(predicted: str, reference: str) -> float:
     number_of_cuts = max(len(reference) - 1, 1)
     return squared_mountain_distance(predicted, reference) / number_of_cuts
 
+
+def normalized_squared_mountain_distance(predicted: str, reference: str) -> float:
+    """Return squared distance divided by the maximum path discrepancy.
+
+    At cut k of a length-n structure, every valid mountain height is bounded by
+    min(k, n-k).  Dividing by the sum of these squared bounds gives a
+    reference-independent, dimensionless value in [0, 1].
+    """
+    if len(predicted) != len(reference):
+        raise ValueError("Structures must have the same length")
+    n = len(reference)
+    maximum_squared_distance = sum(
+        min(cut, n - cut) ** 2 for cut in range(1, n)
+    )
+    if maximum_squared_distance == 0:
+        return 0.0
+    return squared_mountain_distance(predicted, reference) / maximum_squared_distance
