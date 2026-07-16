@@ -2,12 +2,13 @@
 
 Status: working policy (2026-07-14)
 
-## One prediction method
+## Two explicit prediction spaces
 
-The public package will expose one estimator: the sequence-constrained,
-pseudoknot-free Fréchet mean under expected squared mountain loss.
-
-The prediction constraints are fixed parts of the method:
+The public package exposes the same expected squared mountain-loss objective
+over two explicitly named prediction spaces. The relaxed exact estimator
+projects onto nonnegative unit-step mountain paths without pairability or
+minimum-hairpin constraints. Its position-height DP takes O(nH) time and O(nH)
+traceback space. The sequence-constrained estimator additionally requires:
 
 - Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs only;
 - minimum hairpin length 3;
@@ -32,11 +33,13 @@ mountain-centroid --seq SEQUENCE --bpp-beam-size 100
 mountain-centroid --seq SEQUENCE --bpp-backend vienna
 ```
 
-Algorithm-development switches, reference solvers, and paper-only sampling
+The relaxed solver is available through the public Python function
+`relaxed_mountain_centroid`; CLI naming will be finalized with the two-variant
+interface. Algorithm-development switches, reference solvers, and paper-only sampling
 analyses should not become user-facing modes. If an exact small-instance oracle
 is needed for tests, it belongs under `tests/` rather than the installed CLI.
 
-## Implementation status
+## Constrained implementation status
 
 The public solver is a left-to-right beam search over persistent stacks of open
 base pairs. It enforces sequence-dependent pair admissibility, minimum hairpin
