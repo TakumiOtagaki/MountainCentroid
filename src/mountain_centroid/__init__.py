@@ -14,12 +14,20 @@ from .constrained import (
 )
 from .cpp_constrained import cpp_sequence_constrained_mountain_centroid
 from .relaxed import RelaxedResult, relaxed_mountain_centroid
+from .topology import (
+    RNATreeGraph,
+    TopologyDescriptors,
+    rna_tree_graph,
+    topology_descriptors,
+)
 
 __all__ = [
     "Prediction",
     "ConstrainedDiagnostics",
     "ConstrainedResult",
     "RelaxedResult",
+    "RNATreeGraph",
+    "TopologyDescriptors",
     "base_pair_f1",
     "cpp_sequence_constrained_mountain_centroid",
     "mean_squared_mountain_distance",
@@ -27,6 +35,8 @@ __all__ = [
     "predict",
     "predict_from_profile",
     "relaxed_mountain_centroid",
+    "rna_tree_graph",
     "sequence_constrained_mountain_centroid",
     "squared_mountain_distance",
+    "topology_descriptors",
 ]
