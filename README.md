@@ -172,3 +172,9 @@ The first implementation was extracted from
 `TakumiOtagaki/ZukerStyleCentroidFold` at commit
 `17d39d288ed6900561d93de47a8a1b2b98d2c329`. Manuscript analyses, datasets,
 and generated figures are maintained separately from this reusable package.
+
+## License
+
+Code and documentation authored for MountainCentroid are available under the
+[BSD 3-Clause License](LICENSE). LinearPartition and ViennaRNA are subject to
+their respective license terms; see [Third-party software](THIRD_PARTY_LICENSES.md).

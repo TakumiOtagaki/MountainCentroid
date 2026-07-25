@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,6 +7,8 @@ name = "mountain-centroid"
 version = "0.1.0"
 description = "Mountain-profile centroid inference for RNA secondary-structure ensembles"
 readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE", "THIRD_PARTY_LICENSES.md"]
 requires-python = ">=3.10"
 keywords = ["RNA", "secondary structure", "bioinformatics"]
 dependencies = [
