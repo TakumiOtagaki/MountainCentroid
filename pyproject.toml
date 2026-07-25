@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mountain-centroid"
-version = "0.1.0"
+version = "1.0.0"
 description = "Mountain-profile centroid inference for RNA secondary-structure ensembles"
 readme = "README.md"
 license = "BSD-3-Clause"
