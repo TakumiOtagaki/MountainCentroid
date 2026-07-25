@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use MountainCentroid, please cite this software."
+title: "MountainCentroid"
+type: software
+authors:
+  - family-names: "Otagaki"
+    given-names: "Takumi"
+version: 0.1.0
+repository-code: "https://github.com/TakumiOtagaki/MountainCentroid"
+url: "https://github.com/TakumiOtagaki/MountainCentroid"
+license: BSD-3-Clause
+keywords:
+  - RNA
+  - secondary structure
+  - ensemble representative
+  - mountain distance

@@ -178,3 +178,8 @@ and generated figures are maintained separately from this reusable package.
 Code and documentation authored for MountainCentroid are available under the
 [BSD 3-Clause License](LICENSE). LinearPartition and ViennaRNA are subject to
 their respective license terms; see [Third-party software](THIRD_PARTY_LICENSES.md).
+
+## Citation
+
+Please use the citation metadata in [`CITATION.cff`](CITATION.cff). A citation
+to the accompanying paper will be added after publication.
