@@ -1,30 +1,66 @@
-# Public software design
+# Architecture and design
 
-Status: working policy (2026-07-14)
+## Objective
 
-## Two explicit prediction spaces
+For a supplied ensemble mean mountain profile
+\(\mu=(\mu_1,\ldots,\mu_{n-1})\), Mountain Centroid minimizes
 
-The public package exposes the same expected squared mountain-loss objective
-over two explicitly named prediction spaces. The relaxed projection
-projects onto nonnegative unit-step mountain paths without pairability or
-minimum-hairpin constraints. Its position-height DP takes O(nH) time and O(nH)
-traceback space. The sequence-constrained estimator additionally requires:
+\[
+J(\sigma;\mu)=\sum_{k=1}^{n-1}(h_\sigma(k)-\mu_k)^2
+\]
 
-- Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs only;
-- minimum hairpin length 3;
-- no pseudoknots.
+over a specified prediction space. Here \(h_\sigma(k)\) is the number of base
+pairs crossing the cut after nucleotide \(k\). BPP inference and optimization
+over candidate structures are separate stages.
 
-LinearPartition-V (fast approximation, public default) and ViennaRNA (optional
-partition-function backend) are BPP backends for the same estimator. They are not separate
-inference modes.
+## Prediction spaces
 
-The former height-only MIQP and pseudoknot-aware L1-MILP branches were research
-prototypes. They are intentionally absent from the public CLI. Their last
-version remains available in Git history at commit `accde04`.
+### Geometry-only
 
-## Interface target
+The geometry-only dynamic program searches nonnegative paths that:
 
-The stable interface should remain close to:
+- start and end at height zero;
+- change by \(-1\), \(0\), or \(1\) at each nucleotide;
+- stay below the positional bound \(\min(k,n-k)\).
+
+The returned path corresponds to a pseudoknot-free dot-bracket structure, but
+it need not satisfy pairability or minimum-hairpin constraints for the input
+sequence. The solver uses `O(nH)` time and traceback space, where `H` is the
+maximum reachable height.
+
+### Pairability-constrained
+
+The interval--external-depth state `F(i, j, d)` stores the minimum cost within
+interval `[i, j]` when `d` outside pairs enclose it. Candidate structures:
+
+- permit AU/UA, GC/CG, and GU/UG pairs;
+- require `TURN = 3`;
+- exclude pseudoknots.
+
+With `D_eff` reached external-depth levels, the implementation uses
+`O(D_eff n^3)` time and `O(D_eff n^2)` memoization space. The corresponding
+worst-case bounds are `O(n^4)` time and `O(n^3)` space.
+
+The Python implementation is the readable reference. The C++ implementation is
+the production backend and follows the same recurrence and deterministic
+tie-breaking rule.
+
+## BPP backend boundary
+
+`bpp_mu.py` converts a BPP matrix into the ensemble mean mountain profile using
+
+\[
+\mu_k=\sum_{i\leq k<j}p_{ij}.
+\]
+
+LinearPartition-V is the default fast backend; ViennaRNA is optional.
+LinearPartition beam pruning affects the supplied BPPs and mean profile, not
+the Mountain Centroid dynamic programs.
+
+## Public interfaces
+
+The primary command-line interface returns a pairability-constrained
+prediction:
 
 ```text
 mountain-centroid --seq SEQUENCE
@@ -32,27 +68,29 @@ mountain-centroid --seq SEQUENCE --bpp-beam-size 100
 mountain-centroid --seq SEQUENCE --bpp-backend vienna
 ```
 
-The relaxed solver is available through the public Python function
-`relaxed_mountain_centroid`; CLI naming will be finalized with the two-variant
-interface. Algorithm-development switches, reference solvers, and paper-only sampling
-analyses should not become user-facing modes. The Python constrained DP is a
-readable reference implementation; the C++ DP is the production backend.
+The public Python API additionally exposes:
 
-## Constrained implementation status
+- `predict` and `predict_from_profile`;
+- `relaxed_mountain_centroid`;
+- Python and C++ pairability-constrained solvers;
+- evaluation and dot-bracket helpers.
 
-The public solver is an interval--external-depth dynamic program. It enforces
-sequence-dependent pair admissibility, minimum hairpin length 3, and
-pseudoknot-free nesting while minimizing squared mountain-profile error. With
-`D_eff` reached external-depth levels it uses `O(D_eff n^3)` time and
-`O(D_eff n^2)` memoization space. The C++ backend and Python reference agree
-with exhaustive enumeration on short instances.
+Research datasets, manuscript figures, and study-specific statistical analyses
+do not belong in this repository.
 
-## Remaining work
+## Validation
 
-Work remaining, in priority order:
+Correctness checks include:
 
-1. Complete the RNAstralign comparison against ViennaRNA MFE and the standard
-   ViennaRNA centroid, including family-stratified outlier inspection.
-2. Implement the Boltzmann-sampling rooted-L2 evaluation in the paper analysis
-   code, not as an inference mode.
-3. Freeze datasets, versions, seeds, and commands for the TBIO submission.
+- exhaustive enumeration on small random instances;
+- Python/C++ equality of structures, objective values, and diagnostics;
+- pairability, `TURN`, balance, and noncrossing invariants;
+- direct recomputation of the objective from returned profiles;
+- the geometry-only lower-bound relationship;
+- LinearPartition and public-API smoke tests.
+
+## Out of scope
+
+The public inference interface does not include pseudoknot prediction,
+alternative MIQP/MILP objectives, or study-specific sampling analyses. Earlier
+research prototypes remain available in Git history.

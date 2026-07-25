@@ -1,4 +1,4 @@
-"""Relaxed projection onto unconstrained nonnegative mountain paths."""
+"""Geometry-only optimization over nonnegative mountain paths."""
 
 from __future__ import annotations
 

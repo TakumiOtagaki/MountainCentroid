@@ -8,10 +8,20 @@ version = "0.1.0"
 description = "Mountain-profile centroid inference for RNA secondary-structure ensembles"
 readme = "README.md"
 requires-python = ">=3.10"
+keywords = ["RNA", "secondary structure", "bioinformatics"]
 dependencies = [
     "numpy>=1.26",
     "ViennaRNA>=2.7",
 ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+Repository = "https://github.com/TakumiOtagaki/MountainCentroid"
+Issues = "https://github.com/TakumiOtagaki/MountainCentroid/issues"
 
 [project.optional-dependencies]
 analysis = ["matplotlib>=3.9"]

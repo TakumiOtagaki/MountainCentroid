@@ -1,4 +1,4 @@
-"""Sequence-constrained mountain-profile projection."""
+"""Pairability-constrained mountain-profile optimization."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from .sequence import MIN_HAIRPIN_LENGTH, can_pair, normalise_sequence
 
 @dataclass(frozen=True, slots=True)
 class ConstrainedDiagnostics:
-    """Dynamic-programming work performed for one constrained projection."""
+    """Dynamic-programming work performed for one constrained prediction."""
 
     states_evaluated: int
     partner_transitions_evaluated: int
@@ -39,7 +39,7 @@ def sequence_constrained_mountain_centroid(
     sequence: str,
     expected_heights: Sequence[float],
 ) -> ConstrainedResult:
-    """Return the globally optimal sequence-valid profile projection.
+    """Return a global minimum over the pairability-constrained space.
 
     The interval state ``F(i, j, d)`` stores the best cost within ``[i, j]``
     when ``d`` outside pairs enclose the interval.  Only states reachable from

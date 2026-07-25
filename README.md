@@ -1,108 +1,174 @@
 # MountainCentroid
 
-MountainCentroid exposes two prediction spaces for expected squared
-mountain loss: a relaxed projection onto mountain paths and a sequence-valid,
-pseudoknot-free projection. The sequence-constrained solver is implemented in
-both Python and C++; the Python implementation serves as a readable reference.
+MountainCentroid selects a single pseudoknot-free RNA secondary structure that
+matches an ensemble mean mountain profile under squared mountain distance.
+The mean profile can be computed from base-pairing probabilities (BPPs), so the
+ensemble does not need to be enumerated.
 
-This repository contains only the reusable implementation. Manuscript sources,
-figures, and paper-specific outputs live in `MountainCentroidPaper`, which pins
-the software revision as a Git submodule.
+The package provides two prediction spaces:
 
-## Provenance
+- **Geometry-only Mountain Centroid** searches nonnegative unit-step mountain
+  paths. It does not enforce nucleotide pairability or a minimum hairpin
+  length.
+- **Pairability-constrained Mountain Centroid** permits AU/UA, GC/CG, and
+  GU/UG pairs, requires at least three nucleotides inside a hairpin
+  (`TURN = 3`), and excludes pseudoknots.
 
-The initial implementation was extracted from
-`TakumiOtagaki/ZukerStyleCentroidFold` at commit
-`17d39d288ed6900561d93de47a8a1b2b98d2c329`.
+Both dynamic programs return a global minimum of their objective over the
+corresponding prediction space for the supplied mean profile. The
+pairability-constrained solver has a readable Python implementation and a
+faster C++ implementation used by the public command-line interface.
 
-## Current scope
+## Requirements
 
-- Compute the relaxed Mountain Centroid with a position-height dynamic
-  program. This variant does not enforce pairability or minimum hairpin length.
-- Compute the sequence-constrained Mountain Centroid with an
-  interval--external-depth dynamic program in `O(D_eff n^3)` time and
-  `O(D_eff n^2)` memoization space (`O(n^4)` and `O(n^3)` worst case).
-- Compute base-pair probabilities and the expected cut-based mountain height
-  with default LinearPartition-V or optional ViennaRNA.
-- Enforce Watson-Crick pairs (AU/UA and GC/CG) plus GU/UG wobble pairs,
-  minimum hairpin length 3, and no pseudoknots during inference.
-- Report standard dot-bracket notation and the direct squared profile error.
+- Python 3.10 or later
+- a C++17 compiler and `make`
+- Git submodules for the default LinearPartition-V backend
 
-Both projection algorithms return their global optima. LinearPartition beam
-pruning is a separate upstream approximation to the BPP-derived expected
-profile.
+ViennaRNA is installed as a Python dependency. LinearPartition-V is pinned as a
+Git submodule and built from source.
 
-The solvers are available as the Python APIs
-`relaxed_mountain_centroid`, `sequence_constrained_mountain_centroid`, and
-`cpp_sequence_constrained_mountain_centroid`. The command-line route uses the
-C++ sequence-constrained solver.
-Pseudoknot prediction and alternative MIQP/MILP objectives are out of scope.
+## Install from a source checkout
 
-## Installation
+Clone recursively, build the two native components, and install the Python
+package:
 
 ```sh
+git clone --recursive https://github.com/TakumiOtagaki/MountainCentroid.git
+cd MountainCentroid
+make -C vendor/LinearPartition
+make constrained
 python -m pip install -e .
 ```
 
-To use the default LinearPartition backend, clone recursively and build the
-vendored upstream source:
+For development with the locked environment:
 
 ```sh
-git submodule update --init --recursive
-make -C vendor/LinearPartition
-make constrained
+uv sync --frozen --extra test
 ```
 
-## Usage
+The current packaging configuration assumes a source checkout: the
+LinearPartition runner and compiled pairability-constrained solver are not
+embedded in a platform wheel.
+
+## Command-line use
+
+LinearPartition-V with beam size 100 is the default BPP backend:
 
 ```sh
-mountain-centroid --seq ACGUACGUACGU
+mountain-centroid --seq GGGAAACCC
 ```
 
-LinearPartition-V is the default:
+The beam size and BPP output cutoff can be set explicitly:
 
 ```sh
 mountain-centroid \
-  --seq ACGUACGUACGU \
-  --bpp-beam-size 100
+  --seq GGGAAACCC \
+  --bpp-beam-size 100 \
+  --bpp-cutoff 0.0
 ```
 
 The optional ViennaRNA partition-function backend can be selected with:
 
 ```sh
-mountain-centroid --seq ACGUACGUACGU --bpp-backend vienna
+mountain-centroid --seq GGGAAACCC --bpp-backend vienna
 ```
-
-LinearPartition uses beam search and therefore approximates the partition
-function and BPPs. Backend and beam size must be reported with experimental
-results; results from the two backends should not be silently pooled.
 
 Equivalent module invocation:
 
 ```sh
-python -m mountain_centroid.mountain_pipeline --seq ACGUACGUACGU
+python -m mountain_centroid.mountain_pipeline --seq GGGAAACCC
 ```
 
-The production Python-to-C++ constrained route can be benchmarked with:
+## Python use
+
+Compute BPPs and a pairability-constrained prediction:
+
+```python
+from mountain_centroid import predict
+
+prediction = predict("GGGAAACCC")
+print(prediction.structure)
+print(prediction.squared_mountain_error)
+```
+
+Use an already computed ensemble mean mountain profile:
+
+```python
+from mountain_centroid import predict_from_profile
+
+prediction = predict_from_profile(
+    "GGGAAACCC",
+    [0.9, 1.8, 2.4, 2.4, 2.4, 2.4, 1.5, 0.5],
+)
+```
+
+The geometry-only solver is available separately:
+
+```python
+from mountain_centroid import relaxed_mountain_centroid
+
+result = relaxed_mountain_centroid(
+    [0.9, 1.8, 2.4, 2.4, 2.4, 2.4, 1.5, 0.5]
+)
+```
+
+Pairs returned by the Python APIs use one-based nucleotide indices.
+
+## BPP backends and reproducibility
+
+LinearPartition uses beam pruning and therefore approximates the partition
+function and BPPs. The beam size, BPP cutoff, backend revision, and
+thermodynamic settings should be reported with experimental results.
+LinearPartition and ViennaRNA outputs should not be pooled without explicitly
+accounting for the backend difference.
+
+The BPP calculation is upstream of Mountain Centroid optimization. The global
+minimum guarantee applies to the supplied mean profile and prediction space; it
+does not remove approximation introduced while computing BPPs.
+
+## Complexity
+
+For an RNA of length `n`:
+
+- the geometry-only solver uses `O(nH)` time and traceback space, where `H` is
+  the maximum reachable mountain height (`O(n^2)` worst case);
+- the pairability-constrained solver uses `O(D_eff n^3)` time and
+  `O(D_eff n^2)` memoization space, where `D_eff` is the number of reached
+  external-depth levels (`O(n^4)` time and `O(n^3)` space in the worst case).
+
+## Tests and benchmarks
+
+Run the test suite with:
+
+```sh
+uv run --frozen --extra test pytest
+```
+
+The tests include small-instance exhaustive enumeration, randomized
+Python/C++ parity checks, structural invariants, BPP backend checks, and
+metric/formatting tests.
+
+Benchmark the production solver with:
 
 ```sh
 uv run python benchmarks/benchmark_sequence_constrained.py \
   --lengths 30 50 100 150 200 300 --instances 3
 ```
 
-An optional backend timing benchmark separates ViennaRNA BPP calculation,
-expected-profile construction, and Mountain Centroid inference:
-
-```sh
-uv run python benchmarks/benchmark_vienna_pipeline.py \
-  --lengths 50 100 200 400 800 --instances 5
-```
-
 ## Repository layout
 
 ```text
-src/mountain_centroid/   reusable implementation and CLI
-tests/                   constraints, exhaustive-oracle, backend, and formatting tests
-benchmarks/              reproducible solver scaling benchmark
+src/mountain_centroid/   Python implementation and public API
+cpp/                     C++ pairability-constrained solver
+tests/                   correctness, parity, backend, and formatting tests
+benchmarks/              solver and pipeline benchmarks
 vendor/LinearPartition/  pinned default BPP backend (Git submodule)
 ```
+
+## Provenance
+
+The first implementation was extracted from
+`TakumiOtagaki/ZukerStyleCentroidFold` at commit
+`17d39d288ed6900561d93de47a8a1b2b98d2c329`. Manuscript analyses, datasets,
+and generated figures are maintained separately from this reusable package.
