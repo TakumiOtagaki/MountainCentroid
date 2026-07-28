@@ -166,13 +166,6 @@ benchmarks/              solver and pipeline benchmarks
 vendor/LinearPartition/  pinned default BPP backend (Git submodule)
 ```
 
-## Provenance
-
-The first implementation was extracted from
-`TakumiOtagaki/ZukerStyleCentroidFold` at commit
-`17d39d288ed6900561d93de47a8a1b2b98d2c329`. Manuscript analyses, datasets,
-and generated figures are maintained separately from this reusable package.
-
 ## License
 
 Code and documentation authored for MountainCentroid are available under the
