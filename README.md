@@ -23,22 +23,28 @@ faster C++ implementation used by the public command-line interface.
 
 - Python 3.10 or later
 - a C++17 compiler and `make`
-- Git submodules for the default LinearPartition-V backend
+- ViennaRNA Python bindings
 
-ViennaRNA is installed as a Python dependency. LinearPartition-V is pinned as a
-Git submodule and built from source.
+ViennaRNA is installed as a Python dependency and is the default BPP backend.
+LinearPartition is pinned as an optional Git submodule for faster approximate
+BPP calculation.
 
 ## Install from a source checkout
 
-Clone recursively, build the two native components, and install the Python
-package:
+Clone recursively, build the pairability-constrained solver, and install the
+Python package:
 
 ```sh
 git clone --recursive https://github.com/TakumiOtagaki/MountainCentroid.git
 cd MountainCentroid
-make -C vendor/LinearPartition
 make constrained
 python -m pip install -e .
+```
+
+To use the optional LinearPartition backend, build it separately:
+
+```sh
+make -C vendor/LinearPartition
 ```
 
 For development with the locked environment:
@@ -53,25 +59,20 @@ embedded in a platform wheel.
 
 ## Command-line use
 
-LinearPartition-V with beam size 100 is the default BPP backend:
+ViennaRNA is the default BPP backend:
 
 ```sh
 mountain-centroid --seq GGGAAACCC
 ```
 
-The beam size and BPP output cutoff can be set explicitly:
+Select LinearPartition explicitly for its beam-pruned BPP approximation:
 
 ```sh
 mountain-centroid \
   --seq GGGAAACCC \
+  --bpp-backend linearpartition \
   --bpp-beam-size 100 \
   --bpp-cutoff 0.0
-```
-
-The optional ViennaRNA partition-function backend can be selected with:
-
-```sh
-mountain-centroid --seq GGGAAACCC --bpp-backend vienna
 ```
 
 Equivalent module invocation:
@@ -117,11 +118,12 @@ Pairs returned by the Python APIs use one-based nucleotide indices.
 
 ## BPP backends and reproducibility
 
+ViennaRNA computes BPPs with the McCaskill algorithm and is the default.
 LinearPartition uses beam pruning and therefore approximates the partition
-function and BPPs. The beam size, BPP cutoff, backend revision, and
-thermodynamic settings should be reported with experimental results.
-LinearPartition and ViennaRNA outputs should not be pooled without explicitly
-accounting for the backend difference.
+function and BPPs. The selected backend, thermodynamic settings, and, for
+LinearPartition, beam size, BPP cutoff, and backend revision should be reported
+with experimental results. Results from the two backends should not be pooled
+without explicitly accounting for the backend difference.
 
 The BPP calculation is upstream of Mountain Centroid optimization. The global
 minimum guarantee applies to the supplied mean profile and prediction space; it
@@ -136,6 +138,13 @@ For an RNA of length `n`:
 - the pairability-constrained solver uses `O(D_eff n^3)` time and
   `O(D_eff n^2)` memoization space, where `D_eff` is the number of reached
   external-depth levels (`O(n^4)` time and `O(n^3)` space in the worst case).
+
+ViennaRNA BPP calculation requires `O(n^3)` time and `O(n^2)` memory, so it
+dominates the end-to-end geometry-only pipeline asymptotically. With a fixed
+beam size, LinearPartition's ensemble approximation scales linearly in `n`;
+the current geometry-only pipeline then uses `O(n^2)` time and memory overall,
+dominated by the path DP and dense BPP representation. Changing the BPP backend
+does not alter the pairability-constrained solver's worst-case bounds.
 
 ## Tests and benchmarks
 
@@ -163,7 +172,7 @@ src/mountain_centroid/   Python implementation and public API
 cpp/                     C++ pairability-constrained solver
 tests/                   correctness, parity, backend, and formatting tests
 benchmarks/              solver and pipeline benchmarks
-vendor/LinearPartition/  pinned default BPP backend (Git submodule)
+vendor/LinearPartition/  optional beam-pruned BPP backend (Git submodule)
 ```
 
 ## License

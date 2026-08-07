@@ -45,6 +45,31 @@ def mountain_expectation_from_bpp(bpp: np.ndarray) -> List[float]:
     return mu
 
 
+def bpp_from_vienna_fold_compound(fold_compound: object) -> np.ndarray:
+    """Return a full BPP matrix after ``fold_compound.pf()`` was called."""
+    n = int(fold_compound.length)
+    if n < 2:
+        return np.zeros((n, n), dtype=float)
+
+    try:
+        probabilities = fold_compound.exp_matrices.probs
+        iindx = fold_compound.iindx
+    except (AttributeError, RuntimeError) as error:
+        raise ValueError(
+            "ViennaRNA partition-function matrices are unavailable; "
+            "call fold_compound.pf() first"
+        ) from error
+    return tri_to_full(n, probabilities, iindx)
+
+
+def bpp_and_mu_from_vienna_fold_compound(
+    fold_compound: object,
+) -> Tuple[np.ndarray, List[float]]:
+    """Return BPPs and expected mountain heights from a prepared fold compound."""
+    bpp = bpp_from_vienna_fold_compound(fold_compound)
+    return bpp, mountain_expectation_from_bpp(bpp)
+
+
 def compute_bpp_vienna(seq: str, temperature: float = 37.0) -> np.ndarray:
     """Compute a thermodynamic BPP matrix with ViennaRNA/RNAlib."""
     import RNA  # ViennaRNA の Python バインディング
@@ -58,9 +83,10 @@ def compute_bpp_vienna(seq: str, temperature: float = 37.0) -> np.ndarray:
     md.temperature = float(temperature)
 
     fc = RNA.fold_compound(seq, md)
+    _, mfe_energy = fc.mfe()
+    fc.exp_params_rescale(mfe_energy)
     fc.pf()
-    bpp_tri = fc.exp_matrices.probs
-    return tri_to_full(n, bpp_tri, fc.iindx)
+    return bpp_from_vienna_fold_compound(fc)
 
 
 def _find_linearpartition_runner(executable: str | os.PathLike[str] | None) -> Path:
@@ -156,7 +182,7 @@ def compute_bpp_and_mu(
     seq: str,
     temperature: float = 37.0,
     *,
-    backend: Backend = "linearpartition",
+    backend: Backend = "vienna",
     beam_size: int = 100,
     cutoff: float = 0.0,
     linearpartition_path: str | os.PathLike[str] | None = None,

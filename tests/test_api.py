@@ -32,7 +32,7 @@ def test_public_profile_api_normalizes_sequence_and_reports_direct_error(
     assert prediction.squared_mountain_error == direct_error
 
 
-def test_public_prediction_defaults_to_linearpartition(monkeypatch):
+def test_public_prediction_defaults_to_vienna(monkeypatch):
     captured = {}
 
     def fake_compute_bpp_and_mu(sequence, **kwargs):
@@ -47,5 +47,5 @@ def test_public_prediction_defaults_to_linearpartition(monkeypatch):
     )
     prediction = api.predict("GAAAU")
 
-    assert captured["backend"] == "linearpartition"
-    assert prediction.bpp_backend == "linearpartition"
+    assert captured["backend"] == "vienna"
+    assert prediction.bpp_backend == "vienna"

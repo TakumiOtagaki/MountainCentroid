@@ -28,8 +28,8 @@ def main() -> None:
     parser.add_argument(
         "--bpp-backend",
         choices=("vienna", "linearpartition"),
-        default="linearpartition",
-        help="BPP backend: LinearPartition-V (default) or ViennaRNA",
+        default="vienna",
+        help="BPP backend: ViennaRNA (default) or LinearPartition",
     )
     parser.add_argument(
         "--bpp-beam-size",
