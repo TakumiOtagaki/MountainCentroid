@@ -13,6 +13,23 @@ over a specified prediction space. Here \(h_\sigma(k)\) is the number of base
 pairs crossing the cut after nucleotide \(k\). BPP inference and optimization
 over candidate structures are separate stages.
 
+### Hybrid extension
+
+In the pairability-constrained space, the hybrid solver minimizes
+
+\[
+Q_\alpha(\sigma)=(1-\alpha)\frac{J(\sigma;\mu)}{M}
+-\alpha\frac{G(\sigma)}{P},
+\qquad
+G(\sigma)=\sum_{(i,j)\in\sigma}(2p_{ij}-1),
+\]
+
+where \(M=\sum_{k=1}^{n-1}\min(k,n-k)^2\), \(P=\lfloor n/2\rfloor\), and
+\(0\leq\alpha\leq1\). Thus \(\alpha=0\) is Mountain Centroid and
+\(\alpha=1\) is the base-pair centroid (\(\gamma=1\)) endpoint. The pair gain
+enters the same interval--external-depth recurrence, so the constrained
+solver's complexity is unchanged.
+
 ## Prediction spaces
 
 ### Geometry-only
@@ -66,11 +83,13 @@ prediction:
 mountain-centroid --seq SEQUENCE
 mountain-centroid --seq SEQUENCE --bpp-beam-size 100
 mountain-centroid --seq SEQUENCE --bpp-backend vienna
+mountain-centroid --seq SEQUENCE --alpha 0 --alpha 0.5 --alpha 1
 ```
 
 The public Python API additionally exposes:
 
 - `predict` and `predict_from_profile`;
+- `predict_hybrid` and `predict_hybrid_curve`;
 - `relaxed_mountain_centroid`;
 - Python and C++ pairability-constrained solvers;
 - evaluation and dot-bracket helpers.
@@ -86,6 +105,7 @@ Correctness checks include:
 - Python/C++ equality of structures, objective values, and diagnostics;
 - pairability, `TURN`, balance, and noncrossing invariants;
 - direct recomputation of the objective from returned profiles;
+- exhaustive hybrid-objective checks, including both endpoints;
 - the geometry-only lower-bound relationship;
 - LinearPartition and public-API smoke tests.
 
