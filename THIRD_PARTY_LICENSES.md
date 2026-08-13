@@ -6,8 +6,8 @@ own copyright and license terms.
 
 ## LinearPartition
 
-The default base-pairing-probability backend is a pinned copy of
-LinearPartition, included as the Git submodule `vendor/LinearPartition`.
+The optional LinearPartition backend is included as the pinned Git submodule
+`vendor/LinearPartition`.
 LinearPartition is distributed under the terms in
 [`vendor/LinearPartition/LICENSE`](vendor/LinearPartition/LICENSE). Those
 terms, rather than the MountainCentroid license, apply to the contents of that

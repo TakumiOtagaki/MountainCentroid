@@ -70,7 +70,8 @@ tie-breaking rule.
 \mu_k=\sum_{i\leq k<j}p_{ij}.
 \]
 
-LinearPartition-V is the default fast backend; ViennaRNA is optional.
+ViennaRNA is the default backend; LinearPartition-V is an optional faster
+approximation.
 LinearPartition beam pruning affects the supplied BPPs and mean profile, not
 the Mountain Centroid dynamic programs.
 
