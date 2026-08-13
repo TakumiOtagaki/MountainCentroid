@@ -142,9 +142,11 @@ def cpp_hybrid_mountain_centroid(
             (height - expected) ** 2
             for height, expected in zip(heights[1:-1], mu)
         )
-        centroid_gain = sum(
-            2.0 * probabilities[left - 1, right - 1] - 1.0
-            for left, right in pairs
+        centroid_gain = float(
+            sum(
+                2.0 * probabilities[left - 1, right - 1] - 1.0
+                for left, right in pairs
+            )
         )
         hybrid_objective = (
             (1.0 - expected_alpha) * squared_error / mountain_scale

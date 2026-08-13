@@ -1,6 +1,13 @@
 """Mountain Centroid public package API."""
 
-from .api import Prediction, predict, predict_from_profile
+from .api import (
+    HybridPrediction,
+    Prediction,
+    predict,
+    predict_from_profile,
+    predict_hybrid,
+    predict_hybrid_curve,
+)
 from .evaluation import (
     base_pair_f1,
     mean_squared_mountain_distance,
@@ -13,19 +20,25 @@ from .constrained import (
     sequence_constrained_mountain_centroid,
 )
 from .cpp_constrained import cpp_sequence_constrained_mountain_centroid
+from .cpp_hybrid import HybridResult, cpp_hybrid_mountain_centroid
 from .relaxed import RelaxedResult, relaxed_mountain_centroid
 
 __all__ = [
     "Prediction",
+    "HybridPrediction",
+    "HybridResult",
     "ConstrainedDiagnostics",
     "ConstrainedResult",
     "RelaxedResult",
     "base_pair_f1",
     "cpp_sequence_constrained_mountain_centroid",
+    "cpp_hybrid_mountain_centroid",
     "mean_squared_mountain_distance",
     "normalized_squared_mountain_distance",
     "predict",
     "predict_from_profile",
+    "predict_hybrid",
+    "predict_hybrid_curve",
     "relaxed_mountain_centroid",
     "sequence_constrained_mountain_centroid",
     "squared_mountain_distance",

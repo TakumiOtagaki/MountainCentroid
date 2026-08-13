@@ -51,6 +51,8 @@ def test_cpp_hybrid_wrapper_returns_defined_objective(cpp_hybrid_binary):
             - result.alpha * result.centroid_gain / 4.0
         )
         assert result.hybrid_objective == pytest.approx(expected)
+        assert isinstance(result.centroid_gain, float)
+        assert isinstance(result.hybrid_objective, float)
         assert result.heights[0] == result.heights[-1] == 0
         assert result.solver_seconds >= 0.0
 
