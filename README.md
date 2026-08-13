@@ -17,7 +17,9 @@ The package provides two prediction spaces:
 Both dynamic programs return a global minimum of their objective over the
 corresponding prediction space for the supplied mean profile. The
 pairability-constrained solver has a readable Python implementation and a
-faster C++ implementation used by the public command-line interface.
+faster C++ implementation used by the public command-line interface. A hybrid
+objective combines Mountain Centroid loss with base-pair centroid gain in the
+pairability-constrained space.
 
 ## Requirements
 
@@ -37,7 +39,7 @@ Python package:
 ```sh
 git clone --recursive https://github.com/TakumiOtagaki/MountainCentroid.git
 cd MountainCentroid
-make constrained
+make constrained hybrid
 python -m pip install -e .
 ```
 
@@ -63,6 +65,13 @@ ViennaRNA is the default BPP backend:
 
 ```sh
 mountain-centroid --seq GGGAAACCC
+```
+
+Evaluate several hybrid weights in one run (`0` is Mountain Centroid and `1`
+is the base-pair centroid ($\gamma=1$) endpoint):
+
+```sh
+mountain-centroid --seq GGGAAACCC --alpha 0 --alpha 0.23 --alpha 1
 ```
 
 Select LinearPartition explicitly for its beam-pruned BPP approximation:
@@ -91,6 +100,14 @@ from mountain_centroid import predict
 prediction = predict("GGGAAACCC")
 print(prediction.structure)
 print(prediction.squared_mountain_error)
+```
+
+Compute several points on the hybrid curve while reusing one BPP calculation:
+
+```python
+from mountain_centroid import predict_hybrid_curve
+
+predictions = predict_hybrid_curve("GGGAAACCC", [0, 0.23, 1])
 ```
 
 Use an already computed ensemble mean mountain profile:
