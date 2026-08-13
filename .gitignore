@@ -7,3 +7,4 @@ __pycache__/
 build/
 dist/
 bin/sequence_constrained_mountain_centroid
+bin/hybrid_mountain_centroid
