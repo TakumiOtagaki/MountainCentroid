@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 
-from .api import predict
+from .api import predict, predict_hybrid_curve
 
 
 def main() -> None:
@@ -53,7 +53,40 @@ def main() -> None:
         default=None,
         help="path to the compiled sequence-constrained solver",
     )
+    parser.add_argument(
+        "--alpha",
+        action="append",
+        type=float,
+        help="hybrid-objective weight; may be specified more than once",
+    )
+    parser.add_argument(
+        "--hybrid-executable",
+        default=None,
+        help="path to the compiled hybrid-objective solver",
+    )
     args = parser.parse_args()
+
+    if args.alpha is not None:
+        predictions = predict_hybrid_curve(
+            args.seq,
+            args.alpha,
+            temperature=args.temp,
+            bpp_backend=args.bpp_backend,
+            bpp_beam_size=args.bpp_beam_size,
+            bpp_cutoff=args.bpp_cutoff,
+            linearpartition_path=args.linearpartition_path,
+            hybrid_executable=args.hybrid_executable,
+        )
+        print(f"# sequence (n={len(predictions[0].sequence)}): {predictions[0].sequence}")
+        print(f"# BPP backend: {predictions[0].bpp_backend}")
+        print("# solver: hybrid interval-depth DP (C++)")
+        for prediction in predictions:
+            print(f"alpha = {prediction.alpha:g}")
+            print("squared_mountain_error =", f"{prediction.squared_mountain_error:.6f}")
+            print("centroid_gain =", f"{prediction.centroid_gain:.6f}")
+            print("hybrid_objective =", f"{prediction.hybrid_objective:.6f}")
+            print("dot_bracket =", prediction.structure)
+        return
 
     prediction = predict(
         args.seq,
