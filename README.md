@@ -5,6 +5,9 @@ matches an ensemble mean mountain profile under squared mountain distance.
 The mean profile can be computed from base-pairing probabilities (BPPs), so the
 ensemble does not need to be enumerated.
 
+In simpler terms, given an RNA sequence, MountainCentroid uses the probabilities
+of possible base pairs to predict one representative secondary structure.
+
 The package provides two prediction spaces:
 
 - **Geometry-only Mountain Centroid** searches nonnegative unit-step mountain
@@ -67,12 +70,25 @@ ViennaRNA is the default BPP backend:
 mountain-centroid --seq GGGAAACCC
 ```
 
-Evaluate several hybrid weights in one run (`0` is Mountain Centroid and `1`
-is the base-pair centroid ($\gamma=1$) endpoint):
+The result is reported in dot-bracket notation, where matching parentheses are
+paired nucleotides and dots are unpaired nucleotides.
+
+The `--alpha` option mixes two prediction objectives:
+
+- `--alpha 0` uses only the Mountain Centroid objective;
+- `--alpha 1` uses only the base-pair centroid objective ($\gamma=1$);
+- values between `0` and `1` optimize a normalized mixture of both objectives.
+
+An intermediate value does not interpolate two dot-bracket structures. The
+solver optimizes a new structure for that weight. Multiple values may be
+evaluated in one run while reusing the same BPP calculation:
 
 ```sh
 mountain-centroid --seq GGGAAACCC --alpha 0 --alpha 0.23 --alpha 1
 ```
+
+Alpha mixes the prediction objectives; it does not mix the ViennaRNA and
+LinearPartition BPP backends.
 
 Select LinearPartition explicitly for its beam-pruned BPP approximation:
 
