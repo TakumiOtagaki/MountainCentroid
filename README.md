@@ -10,7 +10,7 @@ of possible base pairs to predict one representative secondary structure.
 
 The package provides two prediction spaces:
 
-- **Geometry-only Mountain Centroid** searches nonnegative unit-step mountain
+- **Mountain-profile-only Mountain Centroid** searches nonnegative unit-step mountain
   paths. It does not enforce nucleotide pairability or a minimum hairpin
   length.
 - **Pairability-constrained Mountain Centroid** permits AU/UA, GC/CG, and
@@ -137,7 +137,7 @@ prediction = predict_from_profile(
 )
 ```
 
-The geometry-only solver is available separately:
+The mountain-profile-only solver is available separately:
 
 ```python
 from mountain_centroid import relaxed_mountain_centroid
@@ -166,16 +166,16 @@ does not remove approximation introduced while computing BPPs.
 
 For an RNA of length `n`:
 
-- the geometry-only solver uses `O(nH)` time and traceback space, where `H` is
+- the mountain-profile-only solver uses `O(nH)` time and traceback space, where `H` is
   the maximum reachable mountain height (`O(n^2)` worst case);
 - the pairability-constrained solver uses `O(D_eff n^3)` time and
   `O(D_eff n^2)` memoization space, where `D_eff` is the number of reached
   external-depth levels (`O(n^4)` time and `O(n^3)` space in the worst case).
 
 ViennaRNA BPP calculation requires `O(n^3)` time and `O(n^2)` memory, so it
-dominates the end-to-end geometry-only pipeline asymptotically. With a fixed
+dominates the end-to-end mountain-profile-only pipeline asymptotically. With a fixed
 beam size, LinearPartition's ensemble approximation scales linearly in `n`;
-the current geometry-only pipeline then uses `O(n^2)` time and memory overall,
+the current mountain-profile-only pipeline then uses `O(n^2)` time and memory overall,
 dominated by the path DP and dense BPP representation. Changing the BPP backend
 does not alter the pairability-constrained solver's worst-case bounds.
 

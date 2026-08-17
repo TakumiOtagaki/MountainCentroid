@@ -32,9 +32,9 @@ solver's complexity is unchanged.
 
 ## Prediction spaces
 
-### Geometry-only
+### Mountain-profile-only
 
-The geometry-only dynamic program searches nonnegative paths that:
+The mountain-profile-only dynamic program searches nonnegative paths that:
 
 - start and end at height zero;
 - change by \(-1\), \(0\), or \(1\) at each nucleotide;
@@ -107,7 +107,7 @@ Correctness checks include:
 - pairability, `TURN`, balance, and noncrossing invariants;
 - direct recomputation of the objective from returned profiles;
 - exhaustive hybrid-objective checks, including both endpoints;
-- the geometry-only lower-bound relationship;
+- the mountain-profile-only lower-bound relationship;
 - LinearPartition and public-API smoke tests.
 
 ## Out of scope

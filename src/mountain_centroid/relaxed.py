@@ -1,4 +1,4 @@
-"""Geometry-only optimization over nonnegative mountain paths."""
+"""Mountain-profile-only optimization over nonnegative mountain paths."""
 
 from __future__ import annotations
 
