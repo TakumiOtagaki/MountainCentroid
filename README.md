@@ -8,6 +8,11 @@ ensemble does not need to be enumerated.
 In simpler terms, given an RNA sequence, MountainCentroid uses the probabilities
 of possible base pairs to predict one representative secondary structure.
 
+The demonstration below was generated with the public Python API. It shows the
+predicted base pairs and compares their mountain profile with the ensemble mean.
+
+![Mountain Centroid demonstration](docs/assets/mountain_centroid_demo.png)
+
 The package provides two prediction spaces:
 
 - **Mountain-profile-only Mountain Centroid** searches nonnegative unit-step mountain
@@ -56,6 +61,14 @@ For development with the locked environment:
 
 ```sh
 uv sync --frozen --extra test
+```
+
+To regenerate the demonstration above, install the optional plotting dependency
+and run the example script:
+
+```sh
+python -m pip install -e ".[analysis]"
+python examples/plot_demo.py
 ```
 
 The current packaging configuration assumes a source checkout: the
