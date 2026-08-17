@@ -1,4 +1,4 @@
 [submodule "vendor/LinearPartition"]
 	path = vendor/LinearPartition
-	url = git@github.com:LinearFold/LinearPartition.git
+	url = https://github.com/LinearFold/LinearPartition.git
 	ignore = untracked
