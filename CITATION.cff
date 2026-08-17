@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: "Otagaki"
     given-names: "Takumi"
-version: 1.0.0
-date-released: 2026-07-26
+version: 1.0.1
+date-released: 2026-08-17
 repository-code: "https://github.com/TakumiOtagaki/MountainCentroid"
 url: "https://github.com/TakumiOtagaki/MountainCentroid"
 license: BSD-3-Clause
