@@ -50,14 +50,15 @@ def draw_structure(axis: plt.Axes, prediction: Prediction) -> None:
 def draw_profiles(axis: plt.Axes, prediction: Prediction) -> None:
     """Draw the ensemble mean and predicted mountain profiles."""
     n = len(prediction.sequence)
-    boundaries = range(1, n)
+    boundaries = range(1, n + 1)
     axis.plot(
         boundaries,
-        prediction.expected_mountain_heights,
+        (*prediction.expected_mountain_heights, 0.0),
         color=EXPECTED_COLOR,
         marker="o",
         markerfacecolor="white",
         linewidth=2,
+        clip_on=False,
         label=r"Ensemble mean profile $\mu(k)$",
         zorder=3,
     )
@@ -76,7 +77,12 @@ def draw_profiles(axis: plt.Axes, prediction: Prediction) -> None:
     axis.set_ylabel("Nesting depth")
     axis.grid(axis="y", color="#E6E6E6", linewidth=0.8)
     axis.spines[["top", "right"]].set_visible(False)
-    axis.legend(frameon=False, loc="upper center", ncols=2)
+    axis.legend(
+        frameon=False,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 1.02),
+        ncols=2,
+    )
 
 
 def main() -> None:
