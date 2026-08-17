@@ -31,12 +31,11 @@ pairability-constrained space.
 
 ## Requirements
 
-- Python 3.10 or later
+- [`uv`](https://docs.astral.sh/uv/getting-started/installation/)
 - a C++17 compiler and `make`
-- `uv`
-- ViennaRNA Python bindings
 
-ViennaRNA is installed as a Python dependency and is the default BPP backend.
+`uv` installs a compatible Python (3.10 or later) and the Python dependencies.
+ViennaRNA is the default BPP backend.
 LinearPartition is pinned as an optional Git submodule for faster approximate
 BPP calculation.
 
