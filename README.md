@@ -33,6 +33,7 @@ pairability-constrained space.
 
 - Python 3.10 or later
 - a C++17 compiler and `make`
+- `uv`
 - ViennaRNA Python bindings
 
 ViennaRNA is installed as a Python dependency and is the default BPP backend.
@@ -41,15 +42,18 @@ BPP calculation.
 
 ## Install from a source checkout
 
-Clone recursively, build the pairability-constrained solver, and install the
-Python package:
+Clone recursively, build both C++ solvers, and install the locked Python
+environment:
 
 ```sh
 git clone --recursive https://github.com/TakumiOtagaki/MountainCentroid.git
 cd MountainCentroid
-make constrained hybrid
-python -m pip install -e .
+make
+uv sync --frozen
 ```
+
+This creates a local `.venv`. The commands below use `uv run`, so activating
+the environment is not required.
 
 To use the optional LinearPartition backend, build it separately:
 
@@ -67,8 +71,7 @@ To regenerate the demonstration above, install the optional plotting dependency
 and run the example script:
 
 ```sh
-python -m pip install -e ".[analysis]"
-python examples/plot_demo.py
+uv run --frozen --extra analysis python examples/plot_demo.py
 ```
 
 The current packaging configuration assumes a source checkout: the
@@ -80,7 +83,7 @@ embedded in a platform wheel.
 ViennaRNA is the default BPP backend:
 
 ```sh
-mountain-centroid --seq GGGAAACCC
+uv run --frozen mountain-centroid --seq GGGAAACCC
 ```
 
 The result is reported in dot-bracket notation, where matching parentheses are
@@ -97,7 +100,7 @@ solver optimizes a new structure for that weight. Multiple values may be
 evaluated in one run while reusing the same BPP calculation:
 
 ```sh
-mountain-centroid --seq GGGAAACCC --alpha 0 --alpha 0.23 --alpha 1
+uv run --frozen mountain-centroid --seq GGGAAACCC --alpha 0 --alpha 0.23 --alpha 1
 ```
 
 Alpha mixes the prediction objectives; it does not mix the ViennaRNA and
@@ -106,7 +109,7 @@ LinearPartition BPP backends.
 Select LinearPartition explicitly for its beam-pruned BPP approximation:
 
 ```sh
-mountain-centroid \
+uv run --frozen mountain-centroid \
   --seq GGGAAACCC \
   --bpp-backend linearpartition \
   --bpp-beam-size 100 \
@@ -116,7 +119,7 @@ mountain-centroid \
 Equivalent module invocation:
 
 ```sh
-python -m mountain_centroid.mountain_pipeline --seq GGGAAACCC
+uv run --frozen python -m mountain_centroid.mountain_pipeline --seq GGGAAACCC
 ```
 
 ## Python use
@@ -207,7 +210,7 @@ metric/formatting tests.
 Benchmark the production solver with:
 
 ```sh
-uv run python benchmarks/benchmark_sequence_constrained.py \
+uv run --frozen python benchmarks/benchmark_sequence_constrained.py \
   --lengths 30 50 100 150 200 300 --instances 3
 ```
 
