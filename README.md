@@ -71,7 +71,7 @@ To regenerate the demonstration above, install the optional plotting dependency
 and run the example script:
 
 ```sh
-uv run --frozen --extra analysis python examples/plot_demo.py
+uv run --extra analysis python examples/plot_demo.py
 ```
 
 The current packaging configuration assumes a source checkout: the
@@ -83,7 +83,7 @@ embedded in a platform wheel.
 ViennaRNA is the default BPP backend:
 
 ```sh
-uv run --frozen mountain-centroid --seq GGGAAACCC
+uv run mountain-centroid --seq GGGAAACCC
 ```
 
 The result is reported in dot-bracket notation, where matching parentheses are
@@ -100,7 +100,7 @@ solver optimizes a new structure for that weight. Multiple values may be
 evaluated in one run while reusing the same BPP calculation:
 
 ```sh
-uv run --frozen mountain-centroid --seq GGGAAACCC --alpha 0 --alpha 0.23 --alpha 1
+uv run mountain-centroid --seq GGGAAACCC --alpha 0 --alpha 0.23 --alpha 1
 ```
 
 Alpha mixes the prediction objectives; it does not mix the ViennaRNA and
@@ -109,7 +109,7 @@ LinearPartition BPP backends.
 Select LinearPartition explicitly for its beam-pruned BPP approximation:
 
 ```sh
-uv run --frozen mountain-centroid \
+uv run mountain-centroid \
   --seq GGGAAACCC \
   --bpp-backend linearpartition \
   --bpp-beam-size 100 \
@@ -119,7 +119,7 @@ uv run --frozen mountain-centroid \
 Equivalent module invocation:
 
 ```sh
-uv run --frozen python -m mountain_centroid.mountain_pipeline --seq GGGAAACCC
+uv run python -m mountain_centroid.mountain_pipeline --seq GGGAAACCC
 ```
 
 ## Python use
