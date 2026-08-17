@@ -1,6 +1,19 @@
 from types import SimpleNamespace
 
+import pytest
+
+from mountain_centroid import __version__
 import mountain_centroid.mountain_pipeline as cli
+
+
+def test_cli_reports_package_version(monkeypatch, capsys):
+    monkeypatch.setattr("sys.argv", ["mountain-centroid", "--version"])
+
+    with pytest.raises(SystemExit) as exit_info:
+        cli.main()
+
+    assert exit_info.value.code == 0
+    assert capsys.readouterr().out == f"mountain-centroid {__version__}\n"
 
 
 def test_cli_without_alpha_uses_mountain_centroid(monkeypatch, capsys):

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 
+from . import __version__
 from .api import predict, predict_hybrid_curve
 
 
@@ -14,6 +15,11 @@ def main() -> None:
             "Sequence-constrained, pseudoknot-free Mountain Centroid "
             "prediction"
         )
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument("--seq", required=True, help="RNA sequence (A/C/G/U)")
     parser.add_argument(

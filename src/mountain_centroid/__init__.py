@@ -1,5 +1,12 @@
 """Mountain Centroid public package API."""
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("mountain-centroid")
+except PackageNotFoundError:
+    __version__ = "0+unknown"
+
 from .api import (
     HybridPrediction,
     Prediction,
@@ -24,6 +31,7 @@ from .cpp_hybrid import HybridResult, cpp_hybrid_mountain_centroid
 from .relaxed import RelaxedResult, relaxed_mountain_centroid
 
 __all__ = [
+    "__version__",
     "Prediction",
     "HybridPrediction",
     "HybridResult",
